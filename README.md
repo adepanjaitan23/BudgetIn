@@ -1,123 +1,647 @@
-🚀 BudgetIn: Modern Budgeting Web App (Powered by Google Sheets)
+# 💰 BudgetIn
+### Modern Personal Finance Dashboard powered by Google Sheets
 
-🚀 BudgetIn
+[![Google Apps Script](https://img.shields.io/badge/Backend-Google%20Apps%20Script-4285F4?logo=google)](https://developers.google.com/apps-script)
+[![Google Sheets](https://img.shields.io/badge/Database-Google%20Sheets-34A853?logo=google-sheets\&logoColor=white)](https://www.google.com/sheets/about/)
+[![JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JavaScript-F7DF1E?logo=javascript\&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Tailwind CSS](https://img.shields.io/badge/UI-Tailwind%20CSS-06B6D4?logo=tailwindcss\&logoColor=white)](https://tailwindcss.com/)
+[![Chart.js](https://img.shields.io/badge/Charts-Chart.js-FF6384?logo=chartdotjs\&logoColor=white)](https://www.chartjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Modern Personal Finance Dashboard Web Application
+> **BudgetIn** is a modern personal finance dashboard that transforms Google Sheets into an interactive budgeting application without requiring a separate database or paid backend infrastructure.
 
+BudgetIn memungkinkan pengguna mengelola anggaran, mencatat pengeluaran, memantau pembayaran, serta memvisualisasikan kondisi keuangan melalui dashboard yang responsif.
 
+Arsitektur aplikasi memanfaatkan **Google Sheets sebagai data store** dan **Google Apps Script sebagai backend**, sehingga pengguna dapat mempertahankan data di dalam ekosistem Google miliknya sendiri.
 
+---
 
-BudgetIn mentransformasikan Google Sheets biasa menjadi aplikasi web keuangan pribadi (Fintech-style dashboard) yang modern, interaktif, dan responsif. Aplikasi ini melacak pengeluaran, mengelola anggaran, dan memvisualisasikan data keuangan Anda secara real-time, sembari memastikan seluruh data keuangan tetap aman dan privat di dalam Google Drive Anda sendiri.
+## ✨ Why BudgetIn?
 
-💡 Disclaimer: Aplikasi ini berjalan 100% di dalam ekosistem Google Anda pribadi tanpa server luar, sehingga keamanan dan privasi data keuangan Anda terjamin sepenuhnya.
+Mengelola keuangan pribadi menggunakan spreadsheet memang fleksibel, tetapi pengalaman pengguna masih sangat bergantung pada struktur tabel dan formula manual.
 
-🌟 Fitur Utama
+BudgetIn mencoba menyelesaikan masalah tersebut dengan memberikan lapisan antarmuka modern di atas Google Sheets.
 
-🔄 Sinkronisasi Real-time: Setiap perubahan di web (seperti menambah alokasi, mencentang pembayaran, atau mengubah kategori) otomatis tersimpan ke Google Sheets tanpa reload.
+### Masalah
 
-📊 Visualisasi Interaktif: Dilengkapi Bar Chart (Pill-style) dan Doughnut Chart interaktif yang digerakkan oleh Chart.js.
+* Spreadsheet membutuhkan interaksi manual yang cukup banyak.
+* Visualisasi data sering kali terpisah dari data transaksi.
+* Penggunaan pada perangkat mobile kurang nyaman.
+* Perubahan struktur wallet atau kategori sering membutuhkan editing spreadsheet secara langsung.
+* Pengguna membutuhkan dashboard yang lebih mudah dipahami daripada tabel mentah.
 
-📱 Sangat Responsif: Tampilan tabel desktop otomatis berubah menjadi tata letak kartu (Card layout) yang nyaman saat dibuka di ponsel (Mobile).
+### Solusi
 
-🏷️ Kustomisasi Dinamis: Tambahkan Akun/Wallet baru atau Kategori pengeluaran baru langsung melalui jendela Pop-up di dalam Web App tanpa perlu repot membuka spreadsheet.
+BudgetIn menyediakan:
 
-💸 Fitur Cek Lunas & Progress Bar: Centang tagihan bulanan untuk melihat teks tercoret otomatis dan saksikan bar realisasi pengeluaran bertambah panjang.
+* Dashboard finansial berbasis web.
+* Sinkronisasi data dengan Google Sheets.
+* Visualisasi anggaran dan pengeluaran.
+* Responsive UI untuk desktop dan mobile.
+* Pengelolaan wallet dan kategori langsung dari aplikasi.
+* Filtering berdasarkan bulan dan tahun.
+* Progress tracking untuk realisasi anggaran.
 
-👋 Auto-Greeting & Multi-Month: Menyapa pengguna secara otomatis sesuai akun Google yang masuk serta memfilter data rapi berdasarkan bulan dan tahun.
+---
 
-📸 Contoh Tampilan Antarmuka
+# 🚀 Key Features
 
-Sistem menyajikan visualisasi data yang bersih dan dinamis berdasarkan alokasi anggaran bulanan Anda.
+## 🔄 Real-time Google Sheets Synchronization
 
-1. Tampilan Dashboard Utama
+Setiap perubahan dari web application dikirim kembali ke Google Sheets melalui Google Apps Script.
 
+Contoh operasi:
 
-2. Fitur Kustomisasi Wallet & Kategori
+* Menambahkan alokasi anggaran.
+* Mengubah kategori.
+* Menambahkan wallet.
+* Menandai tagihan sebagai lunas.
+* Memperbarui data pengeluaran.
 
+Tidak diperlukan database eksternal untuk menyimpan data utama aplikasi.
 
-🛠️ Teknologi yang Digunakan
+---
 
-Proyek ini dibangun menggunakan tumpukan teknologi modern tanpa memerlukan database eksternal berbayar:
+## 📊 Interactive Financial Dashboard
 
-Frontend: HTML5, Vanilla JavaScript, Tailwind CSS (via CDN)
+BudgetIn menyediakan visualisasi untuk membantu pengguna memahami kondisi keuangan secara cepat.
 
-Visualisasi Data: Chart.js
+Komponen visualisasi menggunakan **Chart.js**, termasuk:
 
-Ikon & Tipografi: FontAwesome 6 & Google Fonts (Inter)
+* Pill-style bar chart
+* Doughnut chart
+* Budget allocation
+* Spending distribution
+* Progress realisasi pengeluaran
 
-Backend & API: Google Apps Script (GAS)
+---
 
-Database: Google Sheets
+## 📱 Responsive Design
 
-📂 Susunan Proyek
+Dashboard dirancang untuk digunakan pada berbagai ukuran layar.
 
-Struktur file dalam repositori ini:
+### Desktop
 
+Data ditampilkan dalam bentuk tabel dan dashboard dengan informasi yang lebih lengkap.
+
+### Mobile
+
+Tampilan tabel beradaptasi menjadi **card-based layout** agar lebih mudah digunakan pada layar kecil.
+
+BudgetIn juga dapat ditambahkan ke Home Screen pada perangkat mobile sehingga memberikan pengalaman yang menyerupai aplikasi standalone.
+
+---
+
+## 🏷️ Dynamic Wallet & Category Management
+
+Pengguna tidak perlu membuka spreadsheet hanya untuk menambahkan konfigurasi baru.
+
+Melalui interface aplikasi, pengguna dapat menambahkan:
+
+* Wallet / Account
+* Expense Category
+
+Proses dilakukan melalui modal atau pop-up interface.
+
+---
+
+## 💸 Payment Tracking
+
+BudgetIn menyediakan mekanisme untuk menandai pembayaran sebagai selesai.
+
+Saat item ditandai sebagai lunas:
+
+* Status pembayaran diperbarui.
+* Teks dapat ditampilkan dalam kondisi tercoret.
+* Progress pengeluaran diperbarui.
+* Data disinkronkan ke Google Sheets.
+
+---
+
+## 📅 Multi-Month Budget Tracking
+
+Dashboard dapat melakukan filtering berdasarkan:
+
+* Bulan
+* Tahun
+* Wallet
+* Kategori
+
+Dengan demikian, satu spreadsheet dapat digunakan untuk mengelola data keuangan dari beberapa periode.
+
+---
+
+## 👋 Personalized User Experience
+
+Aplikasi dapat memberikan greeting berdasarkan akun Google yang sedang digunakan.
+
+Contoh:
+
+```text
+Good Morning, Ade 👋
+
+Here's your financial overview for September 2026.
+```
+
+---
+
+# 🏗️ System Architecture
+
+BudgetIn menggunakan arsitektur sederhana yang memanfaatkan ekosistem Google.
+
+```mermaid
+flowchart LR
+
+    U[User]
+    F[Frontend<br/>HTML + JavaScript]
+    G[Google Apps Script]
+    S[(Google Sheets)]
+    C[Chart.js]
+
+    U --> F
+    F --> G
+    G --> S
+    S --> G
+    G --> F
+    F --> C
+    C --> U
+```
+
+### Data Flow
+
+```text
+User
+  │
+  ▼
+BudgetIn Web Interface
+  │
+  ▼
+Google Apps Script
+  │
+  ▼
+Google Sheets
+  │
+  ▼
+Google Apps Script
+  │
+  ▼
+Dashboard Update
+```
+
+Pendekatan ini menghilangkan kebutuhan terhadap:
+
+* Dedicated server
+* External SQL database
+* Authentication server
+* Paid backend infrastructure
+
+Namun, akses data tetap mengikuti permission dan konfigurasi deployment Google Apps Script yang digunakan.
+
+---
+
+# 🛠️ Technology Stack
+
+| Layer          | Technology           | Purpose                 |
+| -------------- | -------------------- | ----------------------- |
+| Frontend       | HTML5                | Application structure   |
+| Frontend Logic | Vanilla JavaScript   | Client-side interaction |
+| Styling        | Tailwind CSS         | Responsive UI           |
+| Visualization  | Chart.js             | Financial charts        |
+| Icons          | Font Awesome 6       | UI icons                |
+| Typography     | Google Fonts / Inter | Interface typography    |
+| Backend        | Google Apps Script   | API & business logic    |
+| Data Store     | Google Sheets        | Financial data storage  |
+
+---
+
+# 📂 Project Structure
+
+Struktur repository dibuat sederhana agar mudah dipahami dan dikembangkan.
+
+```text
 budgetin/
-├── Code.gs             # 🚀 Backend Google Apps Script (Database & Validation Handler)
-└── Index.html          # 🎨 Single-file Frontend (UI Tailwind, Chart.js, & Client Logic)
+│
+├── Code.gs
+│   └── Google Apps Script backend
+│
+├── Index.html
+│   └── Frontend application
+│
+├── LICENSE
+│   └── MIT License
+│
+└── README.md
+    └── Project documentation
+```
 
+---
 
-🚀 Cara Instalasi & Penggunaan (Panduan Singkat)
+# 🖥️ Interface Preview
 
-Anda dapat membuat instance BudgetIn Anda sendiri dalam waktu kurang dari 5 menit:
+## Dashboard
 
-Langkah 1: Salin Template Database
+> Tambahkan screenshot dashboard utama repository pada bagian ini.
 
-Pastikan Anda sudah login ke akun Google Anda.
+```text
+📸 screenshots/dashboard.png
+```
 
-Klik link berikut untuk menyalin template database:
+![BudgetIn Dashboard](screenshots/dashboard.png)
 
-👉 Salin Template BudgetIn
+---
 
-Klik tombol "Buat salinan" (Make a copy).
+## Wallet & Category Management
 
-Langkah 2: Masukkan Kode
+> Tambahkan screenshot modal pengelolaan wallet dan kategori.
 
-Di file Google Sheets Anda, pilih menu Ekstensi > Apps Script.
+```text
+📸 screenshots/wallet-category.png
+```
 
-Hapus kode bawaan di Code.gs, lalu tempelkan (paste) seluruh isi dari file Code.gs repositori ini.
+![Wallet and Category Management](screenshots/wallet-category.png)
 
-Buat file HTML baru dengan menekan ikon [+], beri nama Index (tanpa ekstensi .html), lalu tempelkan kode dari file Index.html repositori ini.
+---
 
-Klik ikon Simpan (💾).
+# 📈 Example Use Case
 
-Langkah 3: Deploy sebagai Aplikasi Web
+Misalnya pengguna memiliki budget bulanan:
 
-Di pojok kanan atas editor Apps Script, klik Terapkan (Deploy) > Deployment baru.
+```text
+Monthly Budget
+────────────────────────────
 
-Klik ikon roda gigi (⚙️) di sebelah "Pilih jenis", lalu pilih Aplikasi web.
+Income          Rp10.000.000
 
-Atur konfigurasi berikut:
+Needs            Rp5.000.000
+Wants            Rp2.000.000
+Savings          Rp2.000.000
+Other            Rp1.000.000
+```
 
-Deskripsi: BudgetIn v1
+Pengguna kemudian mencatat pengeluaran melalui BudgetIn.
 
-Jalankan sebagai: Saya (Me)
+Dashboard dapat memperlihatkan:
 
-Siapa yang memiliki akses: Siapa saja (Anyone)
+```text
+Budget Utilization
 
-Klik Terapkan. Berikan izin keamanan Google (Otorisasi akses > Lanjutan > Buka project tak aman > Izinkan).
+████████████████░░░░  78%
 
-Salin URL Aplikasi Web yang muncul!
+Remaining Budget
+Rp2.200.000
+```
 
-💡 Tips Mobile: Buka URL tersebut di browser HP Anda (Safari/Chrome), lalu pilih menu "Add to Home Screen". BudgetIn akan berfungsi layaknya aplikasi native di ponsel Anda!
+Data transaksi tetap disimpan pada Google Sheets yang digunakan sebagai data store aplikasi.
 
-🤝 Kontribusi
+---
 
-Kontribusi, perbaikan bug, dan ide fitur baru selalu terbuka lebar!
+# 🚀 Getting Started
 
-Lakukan Fork pada repositori ini.
+## Prerequisites
 
-Buat branch fitur Anda (git checkout -b fitur-baru-anda).
+Sebelum melakukan deployment, pastikan Anda memiliki:
 
-Commit perubahan Anda (git commit -m 'Menambahkan fitur keren').
+* Google Account
+* Akses ke Google Sheets
+* Akses ke Google Apps Script
+* Browser modern seperti Chrome, Edge, Firefox, atau Safari
 
-Push ke branch tersebut (git push origin fitur-baru-anda).
+---
 
-Kirimkan Pull Request.
+# 1. Copy the Database Template
 
-📝 Lisensi
+Gunakan template Google Sheets berikut:
 
-Proyek ini bersifat sumber terbuka (open-source) di bawah Lisensi MIT. Silakan gunakan, modifikasi, dan distribusikan sesuai kebutuhan Anda.
+👉 [**Copy BudgetIn Template**](https://docs.google.com/spreadsheets/d/1r-MKKP6zqpHTkXCj88lIRkRn-FUsZ1F8_1NMbj-D5zQ/copy)
 
-Dibangun dengan ❤️ menggunakan BudgetIn
+Kemudian klik:
+
+```text
+Make a copy
+```
+
+Spreadsheet hasil salinan akan menjadi data store untuk instance BudgetIn Anda.
+
+---
+
+# 2. Open Apps Script
+
+Pada Google Sheets:
+
+```text
+Extensions
+    ↓
+Apps Script
+```
+
+Buka file:
+
+```text
+Code.gs
+```
+
+Hapus kode bawaan dan masukkan seluruh isi `Code.gs` dari repository.
+
+---
+
+# 3. Add Frontend
+
+Pada Apps Script Editor:
+
+```text
++
+    ↓
+HTML
+```
+
+Berikan nama:
+
+```text
+Index
+```
+
+Kemudian masukkan seluruh isi dari:
+
+```text
+Index.html
+```
+
+Simpan project.
+
+---
+
+# 4. Deploy Web App
+
+Pada Apps Script Editor:
+
+```text
+Deploy
+    ↓
+New deployment
+```
+
+Pilih:
+
+```text
+Select type
+    ↓
+Web app
+```
+
+Gunakan konfigurasi sesuai kebutuhan deployment Anda.
+
+Contoh konfigurasi:
+
+| Setting        | Value         |
+| -------------- | ------------- |
+| Description    | `BudgetIn v1` |
+| Execute as     | `Me`          |
+| Who has access | `Anyone`      |
+
+Klik:
+
+```text
+Deploy
+```
+
+Google kemudian akan meminta authorization berdasarkan permission yang dibutuhkan aplikasi.
+
+Setelah deployment selesai, salin:
+
+```text
+Web app URL
+```
+
+URL tersebut digunakan untuk mengakses BudgetIn.
+
+> **Security note:** Konfigurasi `Who has access: Anyone` membuat URL web app dapat diakses sesuai mekanisme permission yang ditetapkan pada deployment. Jangan menggunakan konfigurasi publik untuk data yang tidak seharusnya dapat diakses oleh pihak lain.
+
+---
+
+# 📱 Mobile Installation
+
+BudgetIn dapat digunakan dari browser mobile.
+
+Pada perangkat mobile:
+
+```text
+Open Web App
+    ↓
+Browser Menu
+    ↓
+Add to Home Screen
+```
+
+Setelah ditambahkan, BudgetIn dapat dibuka seperti aplikasi web pada Home Screen.
+
+---
+
+# 🔧 Configuration
+
+Pada deployment sendiri, pastikan struktur Google Sheets sesuai dengan struktur yang diharapkan oleh `Code.gs`.
+
+Secara konsep:
+
+```text
+Google Sheets
+│
+├── Budget / Allocation
+├── Transactions
+├── Wallet
+├── Categories
+└── Monthly Data
+```
+
+> Struktur sheet yang sebenarnya harus mengikuti implementasi pada `Code.gs`. Jangan menambahkan atau mengganti nama sheet secara sembarangan apabila backend masih mengandalkan nama tersebut.
+
+---
+
+# 🔄 Application Workflow
+
+Contoh alur ketika pengguna menandai pembayaran sebagai lunas:
+
+```text
+User clicks "Paid"
+        │
+        ▼
+Frontend updates UI
+        │
+        ▼
+JavaScript sends request
+        │
+        ▼
+Google Apps Script
+        │
+        ▼
+Validate request
+        │
+        ▼
+Update Google Sheets
+        │
+        ▼
+Return updated data
+        │
+        ▼
+Dashboard refreshes state
+```
+
+Pendekatan tersebut membuat interface dapat memperbarui state tanpa mengharuskan pengguna melakukan reload halaman secara manual.
+
+---
+
+# 🧩 Design Principles
+
+BudgetIn dikembangkan dengan beberapa prinsip:
+
+### Simplicity
+
+Tidak menggunakan infrastruktur backend yang kompleks untuk kebutuhan budgeting pribadi.
+
+### Accessibility
+
+Interface dirancang agar tetap nyaman digunakan dari desktop maupun mobile.
+
+### Data Ownership
+
+Data utama berada pada Google Sheets milik pengguna, bukan pada database SaaS eksternal.
+
+### Low Infrastructure Cost
+
+Tidak membutuhkan server database atau backend berbayar terpisah.
+
+### User-Friendly Interaction
+
+Operasi umum seperti pembayaran, wallet, dan kategori dilakukan dari UI aplikasi.
+
+---
+
+# 🔐 Security & Privacy Considerations
+
+BudgetIn menggunakan Google Sheets sebagai data store dan Google Apps Script sebagai backend.
+
+Artinya, kontrol terhadap data sangat bergantung pada:
+
+* Google Account yang digunakan.
+* Permission spreadsheet.
+* Permission Apps Script.
+* Konfigurasi deployment Web App.
+* Siapa saja yang diberikan akses ke URL aplikasi.
+
+Untuk penggunaan dengan data sensitif, hindari konfigurasi akses publik tanpa memahami konsekuensinya.
+
+**BudgetIn tidak menggunakan klaim "fully secure" hanya karena tidak mempunyai external database.** Tidak adanya server eksternal bukan berarti seluruh aplikasi otomatis aman.
+
+---
+
+# 📌 Project Highlights
+
+BudgetIn merupakan contoh implementasi aplikasi full-stack ringan yang menggabungkan:
+
+```text
+Modern Web UI
+       +
+Client-side JavaScript
+       +
+Google Apps Script
+       +
+Google Sheets
+       +
+Data Visualization
+```
+
+Proyek ini menunjukkan bagaimana Google Workspace dapat digunakan sebagai application platform untuk aplikasi finansial personal dengan kebutuhan infrastruktur yang relatif rendah.
+
+---
+
+# 🗺️ Roadmap
+
+Beberapa pengembangan yang dapat ditambahkan ke versi berikutnya:
+
+* [ ] Dark mode
+* [ ] Advanced transaction search
+* [ ] Recurring transaction
+* [ ] Budget notification
+* [ ] Export monthly report
+* [ ] CSV import/export
+* [ ] Financial summary report
+* [ ] PWA support
+* [ ] Offline caching
+* [ ] More granular access control
+* [ ] Automated backup
+* [ ] Unit and integration testing
+
+---
+
+# 🤝 Contributing
+
+Contributions, bug fixes, documentation improvements, and feature ideas are welcome.
+
+### 1. Fork Repository
+
+```bash
+git fork <repository-url>
+```
+
+### 2. Create Feature Branch
+
+```bash
+git checkout -b feature/nama-fitur
+```
+
+### 3. Commit Changes
+
+```bash
+git add .
+git commit -m "feat: add new feature"
+```
+
+### 4. Push Branch
+
+```bash
+git push origin feature/nama-fitur
+```
+
+### 5. Open Pull Request
+
+Buat Pull Request dan jelaskan:
+
+* Masalah yang diselesaikan.
+* Perubahan yang dibuat.
+* Dampak terhadap fitur existing.
+* Screenshot apabila terdapat perubahan UI.
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+Lihat file [LICENSE](LICENSE) untuk informasi lengkap.
+
+---
+
+# 👨‍💻 Author
+
+**BudgetIn**
+
+Modern personal finance dashboard built with:
+
+```text
+Google Apps Script
++
+Google Sheets
++
+Vanilla JavaScript
++
+Tailwind CSS
++
+Chart.js
+```
+
+---
+
+<p align="center">
+
+**Built with ❤️ for smarter personal budgeting.**
+
+</p>
