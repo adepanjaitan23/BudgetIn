@@ -1,5 +1,6 @@
 # 💰 BudgetIn
 ### Modern Personal Finance Dashboard powered by Google Sheets
+![BudgetIn Dashboard](assets/tampilan banner.PNG)
 
 [![Google Apps Script](https://img.shields.io/badge/Backend-Google%20Apps%20Script-4285F4?logo=google)](https://developers.google.com/apps-script)
 [![Google Sheets](https://img.shields.io/badge/Database-Google%20Sheets-34A853?logo=google-sheets\&logoColor=white)](https://www.google.com/sheets/about/)
@@ -239,26 +240,12 @@ budgetin/
 # 🖥️ Interface Preview
 
 ## Dashboard
-
-> Tambahkan screenshot dashboard utama repository pada bagian ini.
-
-```text
-📸 screenshots/dashboard.png
-```
-
-![BudgetIn Dashboard](screenshots/dashboard.png)
+![BudgetIn Dashboard](assets/tampilan UI-1.PNG)
 
 ---
 
 ## Wallet & Category Management
-
-> Tambahkan screenshot modal pengelolaan wallet dan kategori.
-
-```text
-📸 screenshots/wallet-category.png
-```
-
-![Wallet and Category Management](screenshots/wallet-category.png)
+![BudgetIn Wallet and Category Management](assets/tampilan UI-2.PNG)
 
 ---
 
