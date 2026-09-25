@@ -1,109 +1,123 @@
 🚀 BudgetIn: Modern Budgeting Web App (Powered by Google Sheets)
 
-A sleek, responsive, and modern personal finance dashboard that uses Google Sheets as its database. Built with Google Apps Script, HTML, Tailwind CSS, and Chart.js.
+🚀 BudgetIn
 
-BudgetIn transforms a standard, boring spreadsheet into a beautiful Fintech-style web application. It allows you to track expenses, manage budgets, and visualize your financial data in real-time, all while keeping your data 100% private and secure within your own Google Drive.
+Modern Personal Finance Dashboard Web Application
 
-Tip: Take a screenshot of your web app and replace the image link above.
 
-✨ Key Features
 
-No-Database Setup: Uses Google Sheets as a free, easily accessible, and editable backend database.
 
-Real-time Synchronization: Edits made on the web app (like changing allocations or adding new expenses) are automatically saved to your Google Sheet without page reloads.
+BudgetIn mentransformasikan Google Sheets biasa menjadi aplikasi web keuangan pribadi (Fintech-style dashboard) yang modern, interaktif, dan responsif. Aplikasi ini melacak pengeluaran, mengelola anggaran, dan memvisualisasikan data keuangan Anda secara real-time, sembari memastikan seluruh data keuangan tetap aman dan privat di dalam Google Drive Anda sendiri.
 
-Interactive Dashboard: Features a modern Bar Chart and Doughnut Chart powered by Chart.js that update instantly as you type.
+💡 Disclaimer: Aplikasi ini berjalan 100% di dalam ekosistem Google Anda pribadi tanpa server luar, sehingga keamanan dan privasi data keuangan Anda terjamin sepenuhnya.
 
-Mobile Responsive: The desktop table transforms into a beautiful, touch-friendly card layout when viewed on mobile devices.
+🌟 Fitur Utama
 
-Dynamic Customization: Add new Wallets/Accounts or Expense Categories directly from the Web App modal. The UI automatically generates new colors and updates the dropdowns.
+🔄 Sinkronisasi Real-time: Setiap perubahan di web (seperti menambah alokasi, mencentang pembayaran, atau mengubah kategori) otomatis tersimpan ke Google Sheets tanpa reload.
 
-Progress Tracking: Check off paid expenses to see a visual "strikethrough" effect and watch your monthly realization progress bar grow.
+📊 Visualisasi Interaktif: Dilengkapi Bar Chart (Pill-style) dan Doughnut Chart interaktif yang digerakkan oleh Chart.js.
 
-Smart Month Filtering: Data is saved in a single sheet but can be filtered dynamically by month and year.
+📱 Sangat Responsif: Tampilan tabel desktop otomatis berubah menjadi tata letak kartu (Card layout) yang nyaman saat dibuka di ponsel (Mobile).
 
-Auto-Greeting: Greets the user using their Google account name.
+🏷️ Kustomisasi Dinamis: Tambahkan Akun/Wallet baru atau Kategori pengeluaran baru langsung melalui jendela Pop-up di dalam Web App tanpa perlu repot membuka spreadsheet.
 
-🛠️ Tech Stack
+💸 Fitur Cek Lunas & Progress Bar: Centang tagihan bulanan untuk melihat teks tercoret otomatis dan saksikan bar realisasi pengeluaran bertambah panjang.
 
-Frontend: HTML5, JavaScript (Vanilla), Tailwind CSS (via CDN)
+👋 Auto-Greeting & Multi-Month: Menyapa pengguna secara otomatis sesuai akun Google yang masuk serta memfilter data rapi berdasarkan bulan dan tahun.
 
-Data Visualization: Chart.js
+📸 Contoh Tampilan Antarmuka
 
-Icons: FontAwesome 6
+Sistem menyajikan visualisasi data yang bersih dan dinamis berdasarkan alokasi anggaran bulanan Anda.
+
+1. Tampilan Dashboard Utama
+
+
+2. Fitur Kustomisasi Wallet & Kategori
+
+
+🛠️ Teknologi yang Digunakan
+
+Proyek ini dibangun menggunakan tumpukan teknologi modern tanpa memerlukan database eksternal berbayar:
+
+Frontend: HTML5, Vanilla JavaScript, Tailwind CSS (via CDN)
+
+Visualisasi Data: Chart.js
+
+Ikon & Tipografi: FontAwesome 6 & Google Fonts (Inter)
 
 Backend & API: Google Apps Script (GAS)
 
 Database: Google Sheets
 
-📂 File Structure
+📂 Susunan Proyek
 
-Code.gs: The Google Apps Script backend. Handles reading/writing data to the spreadsheet, fetching dynamic dropdown rules, and storing monthly income data via PropertiesService.
+Struktur file dalam repositori ini:
 
-Index.html: The single-file frontend containing structure, styling (Tailwind classes + custom CSS), and frontend logic (fetching data, rendering charts, auto-saving).
+budgetin/
+├── Code.gs             # 🚀 Backend Google Apps Script (Database & Validation Handler)
+└── Index.html          # 🎨 Single-file Frontend (UI Tailwind, Chart.js, & Client Logic)
 
-🚀 How to Install & Use (Setup Guide)
 
-You can easily deploy your own instance of BudgetIn in less than 5 minutes. No server hosting required!
+🚀 Cara Instalasi & Penggunaan (Panduan Singkat)
 
-Step 1: Copy the Database Template
+Anda dapat membuat instance BudgetIn Anda sendiri dalam waktu kurang dari 5 menit:
 
-Make sure you are logged into your Google Account.
+Langkah 1: Salin Template Database
 
-Click this link to copy the required database structure:
+Pastikan Anda sudah login ke akun Google Anda.
 
-👉 Click Here to Copy the BudgetIn Template
+Klik link berikut untuk menyalin template database:
 
-Click "Make a copy".
+👉 Salin Template BudgetIn
 
-Step 2: Clean the Dummy Data (Important!)
+Klik tombol "Buat salinan" (Make a copy).
 
-In your new Google Sheet, select the sample rows from row 2 downwards.
+Langkah 2: Masukkan Kode
 
-Press Delete or Backspace to clear them out.
+Di file Google Sheets Anda, pilih menu Ekstensi > Apps Script.
 
-Note: Keep Row 1 (Status, Account, Expenses List, etc.) intact.
+Hapus kode bawaan di Code.gs, lalu tempelkan (paste) seluruh isi dari file Code.gs repositori ini.
 
-Step 3: Add the Code
+Buat file HTML baru dengan menekan ikon [+], beri nama Index (tanpa ekstensi .html), lalu tempelkan kode dari file Index.html repositori ini.
 
-In your new Google Sheet, go to the top menu and click Extensions > Apps Script.
+Klik ikon Simpan (💾).
 
-A new tab will open. Delete any existing code in the Code.gs file and paste the contents of the Code.gs from this repository.
+Langkah 3: Deploy sebagai Aplikasi Web
 
-Click the [+] icon on the left panel, select HTML, and name it Index (capital 'I').
+Di pojok kanan atas editor Apps Script, klik Terapkan (Deploy) > Deployment baru.
 
-Delete the default HTML code and paste the contents of Index.html from this repository.
+Klik ikon roda gigi (⚙️) di sebelah "Pilih jenis", lalu pilih Aplikasi web.
 
-Click the Save icon (💾).
+Atur konfigurasi berikut:
 
-Step 4: Deploy as a Web App
+Deskripsi: BudgetIn v1
 
-In the Apps Script editor, click the blue Deploy button at the top right, then select New deployment.
+Jalankan sebagai: Saya (Me)
 
-Click the gear icon (⚙️) next to "Select type" and choose Web app.
+Siapa yang memiliki akses: Siapa saja (Anyone)
 
-Fill in the configuration:
+Klik Terapkan. Berikan izin keamanan Google (Otorisasi akses > Lanjutan > Buka project tak aman > Izinkan).
 
-Description: BudgetIn v1 (or anything you like)
+Salin URL Aplikasi Web yang muncul!
 
-Execute as: Me (This ensures you can access it on your phone without logging in repeatedly).
+💡 Tips Mobile: Buka URL tersebut di browser HP Anda (Safari/Chrome), lalu pilih menu "Add to Home Screen". BudgetIn akan berfungsi layaknya aplikasi native di ponsel Anda!
 
-Who has access: Anyone (Only those with the long, secret link can open it).
+🤝 Kontribusi
 
-Click Deploy.
+Kontribusi, perbaikan bug, dan ide fitur baru selalu terbuka lebar!
 
-Note: Google will ask for Authorization. Click "Authorize access" > choose your email > click "Advanced" > click "Go to Untitled project (unsafe)" > click "Allow".
+Lakukan Fork pada repositori ini.
 
-Done! Copy the Web app URL. This is the link to your personal finance app.
+Buat branch fitur Anda (git checkout -b fitur-baru-anda).
 
-💡 Pro Tip: Open the Web app URL on your smartphone's browser (Safari/Chrome) and select "Add to Home Screen". BudgetIn will look and feel like a native mobile app!
+Commit perubahan Anda (git commit -m 'Menambahkan fitur keren').
 
-🤝 Contributing
+Push ke branch tersebut (git push origin fitur-baru-anda).
 
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
+Kirimkan Pull Request.
 
-📝 License
+📝 Lisensi
 
-This project is open-source and available under the MIT License. Feel free to use, modify, and distribute it as you see fit.
+Proyek ini bersifat sumber terbuka (open-source) di bawah Lisensi MIT. Silakan gunakan, modifikasi, dan distribusikan sesuai kebutuhan Anda.
 
-Built with ❤️ using BudgetIn
+Dibangun dengan ❤️ menggunakan BudgetIn
