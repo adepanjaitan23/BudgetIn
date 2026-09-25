@@ -262,39 +262,6 @@ budgetin/
 
 ---
 
-# 📈 Example Use Case
-
-Misalnya pengguna memiliki budget bulanan:
-
-```text
-Monthly Budget
-────────────────────────────
-
-Income          Rp10.000.000
-
-Needs            Rp5.000.000
-Wants            Rp2.000.000
-Savings          Rp2.000.000
-Other            Rp1.000.000
-```
-
-Pengguna kemudian mencatat pengeluaran melalui BudgetIn.
-
-Dashboard dapat memperlihatkan:
-
-```text
-Budget Utilization
-
-████████████████░░░░  78%
-
-Remaining Budget
-Rp2.200.000
-```
-
-Data transaksi tetap disimpan pada Google Sheets yang digunakan sebagai data store aplikasi.
-
----
-
 # 🚀 Getting Started
 
 ## Prerequisites
@@ -553,25 +520,6 @@ Proyek ini menunjukkan bagaimana Google Workspace dapat digunakan sebagai applic
 
 ---
 
-# 🗺️ Roadmap
-
-Beberapa pengembangan yang dapat ditambahkan ke versi berikutnya:
-
-* [ ] Dark mode
-* [ ] Advanced transaction search
-* [ ] Recurring transaction
-* [ ] Budget notification
-* [ ] Export monthly report
-* [ ] CSV import/export
-* [ ] Financial summary report
-* [ ] PWA support
-* [ ] Offline caching
-* [ ] More granular access control
-* [ ] Automated backup
-* [ ] Unit and integration testing
-
----
-
 # 🤝 Contributing
 
 Contributions, bug fixes, documentation improvements, and feature ideas are welcome.
@@ -641,7 +589,5 @@ Chart.js
 ---
 
 <p align="center">
-
-**Built with ❤️ for smarter personal budgeting.**
 
 </p>
