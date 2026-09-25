@@ -1,6 +1,6 @@
 # 💰 BudgetIn
 ### Modern Personal Finance Dashboard powered by Google Sheets
-![BudgetIn Dashboard](assets/tampilan banner.PNG)
+![BudgetIn Dashboard](assets/banner.PNG)
 
 [![Google Apps Script](https://img.shields.io/badge/Backend-Google%20Apps%20Script-4285F4?logo=google)](https://developers.google.com/apps-script)
 [![Google Sheets](https://img.shields.io/badge/Database-Google%20Sheets-34A853?logo=google-sheets\&logoColor=white)](https://www.google.com/sheets/about/)
@@ -240,12 +240,12 @@ budgetin/
 # 🖥️ Interface Preview
 
 ## Dashboard
-![BudgetIn Dashboard](assets/tampilan UI-1.PNG)
+![BudgetIn Dashboard](assets/dashboard.PNG)
 
 ---
 
 ## Wallet & Category Management
-![BudgetIn Wallet and Category Management](assets/tampilan UI-2.PNG)
+![BudgetIn Wallet and Category Management](assets/wallet-category.PNG)
 
 ---
 
