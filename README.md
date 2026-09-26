@@ -240,12 +240,12 @@ budgetin/
 # 🖥️ Interface Preview
 
 ## Dashboard
-![BudgetIn Dashboard](assets/dashboard.PNG)
+![BudgetIn Dashboard](assets/dashboard1.PNG)
 
 ---
 
 ## Wallet & Category Management
-![BudgetIn Wallet and Category Management](assets/wallet-category.PNG)
+![BudgetIn Wallet and Category Management](assets/wallet-category1.PNG)
 
 ---
 
