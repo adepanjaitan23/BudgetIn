@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetIn Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> tailwind.config = { darkMode: 'class', } </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        * { transition: background-color 0.3s ease, border-color 0.3s ease; }
+        
+        .strikethrough td { text-decoration: line-through; opacity: 0.5; background-color: rgba(243, 244, 246, 0.5); }
+        .dark .strikethrough td { background-color: rgba(30, 41, 59, 0.5); }
+        
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            opacity: 0; width: 100%; height: 100%; position: absolute; top: 0; left: 0; cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .responsive-table thead { display: none; }
+            .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td { display: block; width: 100%; }
+            .responsive-table tr { margin-bottom: 15px; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 10px; position: relative; }
+            .dark .responsive-table tr { border-color: #334155; }
+            .responsive-table td { text-align: right; padding-left: 50%; position: relative; border-bottom: 1px solid #f3f4f6; }
+            .dark .responsive-table td { border-bottom-color: #1e293b; }
+            .responsive-table td:last-child { border-bottom: 0; }
+            .responsive-table td::before { content: attr(data-label); position: absolute; left: 10px; width: 45%; text-align: left; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: #6b7280; }
+            .dark .responsive-table td::before { color: #9ca3af; }
+            .mobile-bottom-right { position: absolute; top: 10px; right: 10px; width: auto !important; padding: 0 !important; border: none !important; }
+            .mobile-bottom-right::before { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-200 selection:bg-teal-200 dark:selection:bg-teal-900 transition-colors duration-300">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-opacity duration-300">
+        <i class="fa-solid fa-circle-notch fa-spin text-teal-500 text-4xl mb-4"></i>
+        <p class="text-gray-600 dark:text-gray-300 font-medium animate-pulse">Loading secure data...</p>
+    </div>
+
+    <!-- Modal Add Option -->
+    <div id="add-modal" class="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm z-40 hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300 relative border border-gray-100 dark:border-slate-700">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-rose-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h2 class="text-xl font-bold mb-1 text-gray-800 dark:text-white">Add New Option</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Create a new wallet account or expense category.</p>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                <div class="flex gap-4">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="optionType" value="account" class="peer hidden" checked>
+                        <div class="peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:border-teal-500 border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-center transition-all text-gray-600 dark:text-gray-300">
+                            <i class="fa-solid fa-wallet mr-2"></i>Wallet
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="optionType" value="category" class="peer hidden">
+                        <div class="peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:border-teal-500 border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-center transition-all text-gray-600 dark:text-gray-300">
+                            <i class="fa-solid fa-tag mr-2"></i>Category
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                <input type="text" id="new-option-name" class="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg px-4 py-2.5 outline-none focus:border-teal-500 transition-all shadow-sm" placeholder="e.g. Mandiri, Shopping, dll">
+            </div>
+
+            <button onclick="saveNewOption()" id="btn-save-option" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg transition-colors shadow-md flex items-center justify-center">
+                <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Option
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Wajib Input Income Bulanan -->
+    <div id="income-required-modal" class="fixed inset-0 bg-gray-900/60 dark:bg-black/75 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div id="income-required-panel" class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md transform scale-95 transition-transform duration-300 relative border border-gray-100 dark:border-slate-700">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-sack-dollar text-2xl text-emerald-500"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-1 text-gray-800 dark:text-white">Masukkan Income Bulan Ini</h2>
+            <p id="income-required-period" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1"></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
+                <span id="income-required-message">Income untuk bulan ini belum pernah diinput.</span> Masukkan income untuk mengaktifkan bulan tersebut.
+            </p>
+            <div id="income-apply-all-box" class="mb-5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/70 dark:bg-emerald-900/20 p-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" id="income-apply-all" class="mt-1 w-4 h-4 accent-emerald-600">
+                    <span>
+                        <span class="block text-sm font-semibold text-gray-700 dark:text-gray-200">Terapkan ke semua bulan yang belum memiliki income</span>
+                        <span id="income-missing-count" class="block text-xs text-gray-500 dark:text-gray-400 mt-1">Belum ada income pada 0 bulan.</span>
+                    </span>
+                </label>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Income</label>
+            <div class="flex items-center border border-gray-300 dark:border-slate-600 dark:bg-slate-700 rounded-xl px-4 py-3 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                <span class="text-lg font-bold text-gray-500 dark:text-gray-300 mr-2">Rp</span>
+                <input type="text" inputmode="numeric" id="income-required-input" class="bg-transparent text-2xl font-bold text-gray-800 dark:text-white outline-none w-full" placeholder="0" autocomplete="off">
+            </div>
+            <p id="income-required-error" class="text-xs text-rose-500 font-semibold mt-2 hidden">Masukkan nilai income terlebih dahulu.</p>
+            <button onclick="saveRequiredIncome()" id="btn-save-required-income" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors shadow-md flex items-center justify-center">
+                <i class="fa-solid fa-check mr-2"></i> Simpan Income
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Tutorial -->
+    <div id="tutorial-modal" class="fixed inset-0 bg-gray-900/50 dark:bg-black/70 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg transform scale-95 transition-transform duration-300 relative border border-gray-100 dark:border-slate-700 overflow-hidden">
+            <button onclick="closeTutorial()" class="absolute top-4 right-4 z-10 text-gray-400 hover:text-rose-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+
+            <div id="tutorial-slides-container" class="relative min-h-[420px] max-h-[75vh] overflow-y-auto">
+                <div class="tutorial-slide p-8 pt-10 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-chart-pie text-3xl text-teal-500"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Selamat Datang di BudgetIn! 👋</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                        App sederhana untuk mengatur budget & keuangan bulananmu. Yuk kenalan sebentar sama fitur-fiturnya — cuma butuh waktu &lt;2 menit.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-sack-dollar text-3xl text-emerald-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">1. Isi Income Bulan Ini (Wajib)</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left">
+                        Kalau suatu bulan belum ada income yang diinput, popup akan otomatis muncul minta diisi dulu — ini wajib supaya perhitungan budgeting selalu akurat. Kalau beberapa bulan sekaligus belum ada income, centang <span class="font-semibold text-gray-700 dark:text-gray-200">"Terapkan ke semua bulan yang belum punya income"</span> biar nggak perlu isi satu-satu.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Badge kecil di pojok kotak hijau otomatis kasih tahu status saldo:
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-400 text-left mt-2 space-y-1.5">
+                        <li><span class="font-bold text-teal-600">🐷 Saldo Lalu</span> — sisa uang dari bulan sebelumnya, otomatis ditambahkan.</li>
+                        <li><span class="font-bold text-rose-500">⚠️ Utang Lalu</span> — kamu pernah defisit dan belum lunas, ini akan terus terbawa sampai tertutup.</li>
+                        <li><span class="font-bold text-rose-500">📉 Defisit</span> — alokasi bulan ini sendiri sudah melebihi income.</li>
+                    </ul>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Sedang di tempat umum? Klik ikon mata <i class="fa-solid fa-eye text-emerald-500 mx-1"></i> di "Detail Income" untuk menyembunyikan sementara semua nominal income.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-scale-balanced text-3xl text-violet-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">2. Pilih Kategori yang Tepat</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left">
+                        Kategori <span class="font-semibold text-gray-700 dark:text-gray-200">Needs / Wants / Savings</span> adalah inti budgeting pribadi. Supaya chart & insight-nya akurat, pilih kategori yang sesuai tiap kali mencatat:
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-400 text-left mt-3 space-y-2">
+                        <li><span class="font-bold text-rose-500">Needs</span> (Kebutuhan) — wajib dibayar, kalau tidak hidupmu terganggu: makan pokok, kos/sewa, transport ke kampus/kerja, kuota/pulsa penting, cicilan wajib.</li>
+                        <li><span class="font-bold text-emerald-500">Wants</span> (Keinginan) — gaya hidup yang sebenarnya bisa ditunda atau dikurangi: nongkrong, jajan, belanja online non-esensial, langganan hiburan ekstra.</li>
+                        <li><span class="font-bold text-amber-500">Savings</span> (Tabungan) — uang yang disisihkan, bukan dibelanjakan: nabung, investasi, dana darurat.</li>
+                    </ul>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Patokan umum yang bisa dipakai: <span class="font-semibold text-gray-700 dark:text-gray-200">50% Needs, 30% Wants, 20% Savings</span> dari income — tapi ini cuma panduan awal, sesuaikan dengan kondisimu sendiri.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Masih ragu Needs atau Wants? Tanya ke diri sendiri: <span class="italic">"Kalau bulan ini aku skip ini, apa aku tetap baik-baik saja?"</span> Kalau jawabannya iya, kemungkinan besar itu Wants.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-table-list text-3xl text-sky-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">3. Catat Pengeluaran</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left">
+                        Klik <span class="font-semibold text-gray-700 dark:text-gray-200">"Add Data"</span> untuk menambah baris baru: pilih wallet & kategori, isi harga & qty, pilih <span class="font-semibold text-teal-600">tanggal transaksi</span> aktual, lalu centang kalau sudah dibayar.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Ada pengeluaran yang selalu sama tiap bulan (kos, cicilan, langganan)? Klik ikon <i class="fa-solid fa-rotate text-teal-500 mx-1"></i> di baris itu — bulan depan akan muncul otomatis, nggak perlu input ulang.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Tabelnya panjang? Pakai dropdown filter kategori di atas tabel, atau klik judul kolom <span class="font-semibold text-gray-700 dark:text-gray-200">"Main Category"</span> untuk urutkan A-Z/Z-A.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl text-amber-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">4. Pantau Batas Budget</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left">
+                        Angka <span class="font-semibold text-gray-700 dark:text-gray-200">USAGE%</span> di kotak hijau berubah warna otomatis: putih (aman), kuning (sudah 80%+), merah (sudah melebihi income). Nggak perlu hitung manual.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        Card <span class="font-semibold text-gray-700 dark:text-gray-200">"Budget Categories"</span> menampilkan proporsi Needs/Wants/Savings bulan ini dalam satu bar warna-warni, dan card <span class="font-semibold text-gray-700 dark:text-gray-200">"Realization Goal"</span> kasih info kecil naik/turunnya pengeluaran dibanding bulan lalu.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-50 dark:bg-cyan-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-chart-line text-3xl text-cyan-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">5. Baca Insight dari Chart</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left">
+                        <span class="font-semibold text-gray-700 dark:text-gray-200">"Top Spending by Expenses List"</span> menunjukkan pengeluaran individual terbesarmu bulan ini — enak buat lihat apa yang paling banyak makan budget.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-left mt-3">
+                        <span class="font-semibold text-gray-700 dark:text-gray-200">"Expense Ratio vs Income"</span> menampilkan tren income vs pengeluaran 3 bulan terakhir, jadi langsung kelihatan polanya naik atau turun.
+                    </p>
+                </div>
+                <div class="tutorial-slide p-8 pt-10 text-center hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-circle-check text-3xl text-violet-500"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Siap Dipakai! 🎉</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Semua data tersimpan otomatis, dan datamu di-backup rutin. Kalau lupa cara pakai lagi, klik ikon <i class="fa-solid fa-circle-question text-teal-500 mx-1"></i> di pojok kanan atas kapan saja.
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-8 pb-6 pt-2">
+                <div class="flex items-center justify-center gap-2 mb-5">
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-teal-500 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                    <span class="tutorial-dot w-2 h-2 rounded-full bg-gray-200 dark:bg-slate-600 transition-all"></span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                    <button onclick="closeTutorial()" class="text-sm font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Lewati</button>
+                    <div class="flex gap-2">
+                        <button id="tutorial-back-btn" onclick="tutorialStep(-1)" class="hidden px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Kembali</button>
+                        <button id="tutorial-next-btn" onclick="tutorialStep(1)" class="px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition-colors shadow-sm">Lanjut</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 text-sm font-medium text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-slate-800">
+            <div class="flex-shrink-0">
+                <div class="flex items-center text-teal-600 dark:text-teal-400 font-bold text-xl mb-1">
+                    <i class="fa-solid fa-chart-pie mr-2 text-2xl"></i> BudgetIn
+                </div>
+                <h1 class="text-3xl text-gray-900 dark:text-white tracking-tight">
+                    <span class="font-bold">Welcome Back,</span> <span id="user-name-display" class="font-normal text-gray-700 dark:text-gray-300">User</span>
+                </h1>
+                <div id="current-date" class="text-gray-400 dark:text-gray-500 mt-1">Mengambil tanggal...</div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4 mt-4 md:mt-0 w-full md:w-auto justify-end">
+                <button onclick="openTutorial()" title="Panduan cara pakai" class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-sm px-4 py-2.5 rounded-full group shrink-0 transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <i class="fa-solid fa-circle-question text-teal-500 group-hover:scale-110 transition-transform"></i>
+                </button>
+
+                <button id="theme-toggle" class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-sm px-4 py-2.5 rounded-full group shrink-0 transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <i id="theme-toggle-dark-icon" class="fa-solid fa-moon text-indigo-500 group-hover:-rotate-12 hidden transition-transform"></i>
+                    <i id="theme-toggle-light-icon" class="fa-solid fa-sun text-amber-500 group-hover:rotate-90 hidden transition-transform"></i>
+                </button>
+
+                <div class="relative flex items-center bg-white dark:bg-slate-800 px-4 py-2.5 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 group shrink-0 min-w-[160px] transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <i class="fa-regular fa-calendar text-teal-600 mr-2 text-lg"></i>
+                    <div class="relative w-full">
+                        <input type="month" id="month-year-picker" class="font-bold text-gray-700 dark:text-gray-200 bg-transparent outline-none w-full text-base" onclick="try{this.showPicker();}catch(e){}">
+                    </div>
+                </div>
+
+                <button onclick="openModal()" class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-full font-semibold group shrink-0 whitespace-nowrap transition-transform hover:-translate-y-1 hover:shadow-md">
+                    <i class="fa-solid fa-plus text-teal-600 mr-1"></i> Add Wallet / Cat
+                </button>
+
+                <div id="save-status" class="text-emerald-600 font-bold italic h-5 flex items-center shrink-0 w-[100px] justify-end"></div>
+            </div>
+        </div>
+
+        <!-- TOP WIDGETS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- GREEN CARD: Total Income with icon-only clean privacy toggle & no pencil icon -->
+            <div class="bg-[#10b981] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-between h-full min-h-[200px] transition-transform hover:-translate-y-1 duration-300">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/3 -translate-y-1/3 blur-sm"></div>
+                <div class="absolute bottom-0 right-10 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 blur-sm"></div>
+                <i class="fa-solid fa-wifi rotate-90 absolute top-6 right-6 text-white/50 text-2xl"></i>
+
+                <div class="relative z-10 pt-2">
+                    <h3 class="font-semibold text-white/90 text-sm tracking-wide mb-1 flex items-center justify-between">
+                        <span>Income Bulan Ini</span>
+                        <span id="carry-over-badge" class="text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm bg-white/20 transition-colors duration-300">
+                            <i id="carry-over-icon" class="fa-solid fa-piggy-bank"></i>
+                            <span id="carry-over-label">Saldo Lalu:</span>
+                            <span id="carry-over-amount" class="font-bold">Rp0</span>
+                        </span>
+                    </h3>
+                    <div class="flex items-center mt-2 border-b border-dashed border-white/40 pb-1 mb-2">
+                        <span class="text-2xl font-bold mr-2">Rp</span>
+                        <input type="text" inputmode="numeric" id="total-income-input" readonly aria-readonly="true" title="Income hanya dapat dimasukkan melalui form Income Bulanan" class="cursor-not-allowed bg-transparent text-4xl font-bold outline-none w-full text-white placeholder-white/50" value="0">
+                    </div>
+
+                    <div class="flex items-center justify-between mt-2 mb-1">
+                        <span class="text-[11px] text-white/80 font-semibold tracking-wide uppercase">Detail Income</span>
+                        <button id="toggle-income-details-btn" onclick="toggleIncomeDetailsVisibility()" class="text-white/70 hover:text-white p-1 transition-colors" title="Sembunyikan/Tampilkan detail income">
+                            <i id="income-eye-icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div id="income-details-wrapper" class="space-y-0.5 transition-all">
+                        <p id="effective-income-row" class="text-xs text-white/80 flex items-center gap-1 hidden">
+                            Total Income (Efektif): <span id="effective-income-text" class="font-bold text-white">Rp0</span>
+                            <i class="fa-solid fa-circle-info text-white/50 cursor-help" title="Income bulan ini digabung dengan saldo/utang dari bulan-bulan sebelumnya"></i>
+                        </p>
+                        <p id="account-income-row" class="text-[11px] text-white/90 flex items-center gap-1 mt-0.5 hidden">
+                            Total Income (Account): <span id="account-income-text" class="font-bold text-white">Rp0</span>
+                        </p>
+                        <p id="cash-income-row" class="text-[11px] text-white/90 flex items-center gap-1 mt-0.5 hidden">
+                            Total Income (Cash): <span id="cash-income-text" class="font-bold text-white">Rp0</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative z-10 flex justify-between items-end border-t border-white/20 pt-4 mt-auto">
+                    <div>
+                        <p class="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">NON-ALLOCATED</p>
+                        <p id="non-allocated" class="text-xl font-bold drop-shadow-sm">Rp0</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">USAGE</p>
+                        <p id="usage-text" class="text-xl font-bold drop-shadow-sm">0.0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REALIZATION GOAL & WALLET BALANCES -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 h-full flex flex-col transition-transform hover:-translate-y-1 duration-300 hover:shadow-md">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 dark:text-white">Realization Goal</h3>
+                    <span id="realization-percent" class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-2.5 py-1 rounded-md">0% Paid</span>
+                </div>
+                <p id="trend-insight" class="text-[11px] text-gray-400 dark:text-gray-500 -mt-2 mb-2"></p>
+                
+                <div class="mb-3">
+                    <div class="flex items-baseline gap-1">
+                        <span id="realization-amount" class="text-2xl font-bold text-gray-900 dark:text-white">0</span>
+                        <span class="text-sm font-semibold text-gray-400 dark:text-gray-500">spent</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5 mb-5 relative overflow-hidden">
+                    <div id="realization-bar" class="bg-emerald-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+
+                <div class="border-t border-gray-100 dark:border-slate-700 w-full mb-4"></div>
+
+                <h4 class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">WALLET BALANCES</h4>
+                <div id="account-summary-container" class="space-y-4 max-h-[120px] overflow-y-auto pr-3 relative">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- BUDGET CATEGORIES (Seamless Multi-Color Stacked Bar with Rounded Ends) -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700 h-full flex flex-col transition-transform hover:-translate-y-1 duration-300 hover:shadow-md">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 dark:text-white"><i class="fa-solid fa-chart-pie text-gray-400 mr-2"></i> Budget Categories</h3>
+                    <span class="text-xs font-semibold text-orange-600 bg-orange-50 dark:bg-orange-900/30 px-2.5 py-1 rounded-md">Breakdown</span>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="flex items-baseline gap-1">
+                        <span id="total-budgeting-amount" class="text-2xl font-bold text-gray-900 dark:text-white">0</span>
+                        <span class="text-sm font-semibold text-gray-400 dark:text-gray-500">planned</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2.5 mb-5 relative overflow-hidden flex" id="category-stacked-bar">
+                    <!-- Injected by JS -->
+                </div>
+
+                <div class="border-t border-gray-100 dark:border-slate-700 w-full mb-4"></div>
+
+                <div id="category-summary-container" class="space-y-3 max-h-[130px] overflow-y-auto pr-2">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION (Top Spending Horizontal Bar & Expense vs Income Area Chart) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col items-center justify-center h-[280px] transition-transform hover:-translate-y-1 duration-300 hover:shadow-md">
+                <h3 class="w-full text-left font-bold text-gray-800 dark:text-white mb-2 text-sm"><i class="fa-solid fa-chart-bar mr-2 text-teal-500"></i>Top Spending by Expenses List</h3>
+                <div class="relative w-full h-full"><canvas id="topSpendingChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col items-center justify-center h-[280px] transition-transform hover:-translate-y-1 duration-300 hover:shadow-md">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-gray-800 dark:text-white text-sm"><i class="fa-solid fa-chart-line mr-2 text-emerald-500"></i>Expense Ratio vs Income</h3>
+                    <div class="flex items-center gap-3 text-[11px] font-semibold text-gray-400">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Income</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Expense Ratio</span>
+                    </div>
+                </div>
+                <div class="relative w-full h-full"><canvas id="areaChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TABLE SECTION -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-1 md:p-6 transition-all duration-300 hover:shadow-md">
+            <div class="flex justify-between items-center p-4 md:p-0 md:mb-6 border-b border-gray-50 dark:border-slate-700 md:border-none pb-4 md:pb-0 gap-3 flex-wrap">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">Payment History</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Track and manage your expenses detail</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="relative">
+                        <select id="category-filter" class="appearance-none bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-sm font-semibold pl-3 pr-8 py-2 rounded-xl outline-none cursor-pointer hover:border-teal-400 transition-colors">
+                            <option value="all">Semua Kategori</option>
+                        </select>
+                        <i class="fa-solid fa-filter absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                    <button onclick="addRow()" class="bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-slate-900 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto pb-4">
+                <table class="w-full text-sm text-left responsive-table min-w-[950px]">
+                    <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-slate-700/50 rounded-t-lg">
+                        <tr>
+                            <th class="px-4 py-4 rounded-tl-xl w-10 text-center"><i class="fa-solid fa-check-double"></i></th>
+                            <th class="px-4 py-4 font-semibold w-[120px]"><i class="fa-solid fa-pencil text-teal-500 mr-1"></i> Account</th>
+                            <th class="px-4 py-4 font-semibold min-w-[180px]"><i class="fa-solid fa-pencil text-teal-500 mr-1"></i> Expenses List</th>
+                            <th id="category-sort-header" onclick="toggleCategorySort()" class="px-4 py-4 text-center font-semibold min-w-[130px] cursor-pointer select-none hover:text-teal-500 transition-colors" title="Klik untuk urutkan berdasarkan kategori">
+                                <i class="fa-solid fa-pencil text-teal-500 mr-1"></i> Main Category <i id="category-sort-icon" class="fa-solid fa-sort ml-1 text-gray-300 dark:text-slate-500"></i>
+                            </th>
+                            <th class="px-4 py-4 text-right font-semibold"><i class="fa-solid fa-pencil text-teal-500 mr-1"></i> Price</th>
+                            <th class="px-4 py-4 text-center font-semibold w-24"><i class="fa-solid fa-pencil text-teal-500 mr-1"></i> Qty</th>
+                            <th class="px-4 py-4 text-right font-semibold">Total</th>
+                            <th class="px-4 py-4 text-center font-semibold w-20">Usage</th>
+                            <th class="px-4 py-4 rounded-tr-xl w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-gray-50 dark:divide-slate-700/50">
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colorPalette = ['#0ea5e9', '#d946ef', '#14b8a6', '#f97316', '#8b5cf6', '#eab308', '#ef4444', '#06b6d4'];
+        
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        function getColor(index) { return colorPalette[index % colorPalette.length]; }
+
+        // Data seperti nama pengeluaran atau nama wallet/kategori diketik bebas oleh
+        // pengguna, lalu ditempel langsung ke innerHTML di banyak tempat. Tanpa di-escape,
+        // karakter seperti " < > bisa merusak tampilan (bahkan bisa jadi celah XSS kalau
+        // suatu saat datanya tidak lagi murni dari input sendiri, mis. hasil import/sync).
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[ch]);
+        }
+
+        function getCategoryColor(categoryName) {
+            const name = String(categoryName).toLowerCase();
+            if (name === 'income') return '#3b82f6';
+            if (name === 'wants') return '#10b981';
+            if (name === 'savings') return '#f59e0b';
+            if (name === 'needs') return '#f43f5e';
+            let index = dbOptions.categories.indexOf(categoryName);
+            return getColor(index + 3);
+        }
+
+        function getOptionStyle(type, value, isDark) {
+            let hexColor;
+            if (type === 'account') {
+                let index = dbOptions.accounts.indexOf(value);
+                if (index === -1) return { bg: isDark ? 'rgba(71, 85, 105, 0.3)' : 'rgba(241, 245, 249, 1)', text: isDark ? '#cbd5e1' : '#475569', border: 'transparent' };
+                hexColor = getColor(index);
+            } else {
+                hexColor = getCategoryColor(value);
+            }
+            return { bg: hexToRgba(hexColor, isDark ? 0.2 : 0.1), text: hexColor, border: hexColor };
+        }
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark'); themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark'); themeToggleDarkIcon.classList.add('hidden'); // Fixed icon logic
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden'); themeToggleLightIcon.classList.toggle('hidden');
+            if (localStorage.getItem('color-theme') === 'light') { document.documentElement.classList.add('dark'); localStorage.setItem('color-theme', 'dark'); } 
+            else { document.documentElement.classList.remove('dark'); localStorage.setItem('color-theme', 'light'); }
+            updateApp(); 
+        });
+
+        let dbData = []; let dbIncomes = {}; let dbOptions = { accounts: [], categories: [] };
+        let currentMonth = ""; let currentYear = ""; let totalIncome = 0;
+        let myTopSpendingChart = null; let myAreaChart = null; let saveTimeoutId;
+        let accumulatedCarryOver = 0;
+        let categoryFilter = 'all';
+        let categorySortDir = null;
+        let incomeDetailsHidden = false; // State for privacy icon toggle
+        let isSavePending = false; // true selama ada perubahan yang belum/sedang disimpan ke Spreadsheet
+
+        // Jangan sampai user menutup tab saat ada perubahan yang belum tersimpan (autosave
+        // ini satu-satunya mekanisme penyimpanan — tidak ada tombol "Save" manual).
+        window.addEventListener('beforeunload', (e) => {
+            if (isSavePending) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+        
+        const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+        const formatNumberOnly = (num) => new Intl.NumberFormat('id-ID').format(num);
+
+        function toggleIncomeDetailsVisibility() {
+            incomeDetailsHidden = !incomeDetailsHidden;
+            const icon = document.getElementById('income-eye-icon');
+            
+            if (incomeDetailsHidden) {
+                icon.className = 'fa-solid fa-eye-slash text-xs';
+            } else {
+                icon.className = 'fa-solid fa-eye text-xs';
+            }
+            updateAppTanpaRenderTabel();
+        }
+
+        function getIncomeKey(monthName, yearStr) {
+            let m = (["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(monthName) + 1).toString().padStart(2, '0');
+            return `income_${yearStr}-${m}`; 
+        }
+
+        function updateIncomeBadge(nonAllocated) {
+            const badge = document.getElementById('carry-over-badge');
+            const icon = document.getElementById('carry-over-icon');
+            const label = document.getElementById('carry-over-label');
+            const amount = document.getElementById('carry-over-amount');
+            const carryOver = accumulatedCarryOver || 0;
+
+            if (carryOver < 0) {
+                badge.classList.remove('bg-white/20');
+                badge.classList.add('bg-red-900/60', 'text-rose-100');
+                icon.className = 'fa-solid fa-triangle-exclamation';
+                label.innerText = 'Utang Lalu:';
+                amount.innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(carryOver);
+            } else if (nonAllocated < 0) {
+                badge.classList.remove('bg-white/20');
+                badge.classList.add('bg-red-900/60', 'text-rose-100');
+                icon.className = 'fa-solid fa-arrow-trend-down';
+                label.innerText = 'Defisit:';
+                amount.innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(nonAllocated);
+            } else {
+                badge.classList.remove('bg-red-900/60', 'text-rose-100');
+                badge.classList.add('bg-white/20');
+                icon.className = 'fa-solid fa-piggy-bank';
+                label.innerText = 'Saldo Lalu:';
+                amount.innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(carryOver);
+            }
+        }
+
+        window.onload = () => {
+            const d = new Date();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            currentMonth = monthNames[d.getMonth()];
+            currentYear = d.getFullYear().toString();
+            
+            let monthStr = (d.getMonth() + 1).toString().padStart(2, '0');
+            document.getElementById('month-year-picker').value = `${currentYear}-${monthStr}`;
+            document.getElementById('current-date').innerText = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            if (typeof google === 'undefined') {
+                window.google = { script: { run: { withSuccessHandler: function(cb) { return {
+                    getInitialData: function() { setTimeout(() => cb({
+                        userName: "Aderizkypan", incomes: { 'income_2026-02': '8514000', 'income_2026-01': '10340088' },
+                        options: { accounts: ['Blu', 'Jago', 'BCA'], categories: ['Savings', 'Needs', 'Wants'] },
+                        rows: [
+                            { status: false, account: 'BCA', expense: 'Makan', category: 'Needs', price: 50000, qty: 30, allocation: 1500000, month: 'February', year: '2026', recurring: false, createdAt: '2026-02-22' },
+                            { status: false, account: 'Blu', expense: 'Transport', category: 'Needs', price: 20004, qty: 22, allocation: 440088, month: 'February', year: '2026', recurring: true, createdAt: '2026-02-10' },
+                            { status: true, account: 'BCA', expense: 'Kuota', category: 'Wants', price: 50000, qty: 1, allocation: 50000, month: 'February', year: '2026', recurring: false, createdAt: '2026-02-01' }
+                        ]
+                    }), 300); },
+                    getAccumulatedCarryOver: function() { setTimeout(() => cb(-1826088), 100); },
+                    updateData: function() { setTimeout(() => cb("Success"), 200); },
+                    addNewOption: function(type, name) { setTimeout(() => cb({success:true, options: ['Blu','Jago','BCA',name]}), 200); }
+                }; } } } };
+            }
+
+            try {
+                google.script.run.withSuccessHandler((data) => {
+                    dbData = data.rows || []; dbIncomes = data.incomes || {};
+                    dbOptions = data.options || { accounts: ['Blu'], categories: ['Needs'] };
+
+                    if (!dbOptions.categories.some(c => String(c).toLowerCase() === 'income')) {
+                        dbOptions.categories.unshift('Income');
+                    }
+
+                    document.getElementById('user-name-display').innerText = data.userName || "User";
+                    loadDataForCurrentMonth();
+                }).withFailureHandler((err) => {
+                    console.error(err);
+                    hideLoader();
+                    alert('Gagal memuat data dari Spreadsheet. Coba muat ulang halaman ini.\n\n' + (err && err.message ? err.message : err));
+                }).getInitialData();
+            } catch (e) {
+                console.error(e);
+                hideLoader();
+            }
+        };
+
+        let isFirstLoad = true;
+
+        function hideLoader() {
+            const loader = document.getElementById('loading-screen');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }
+
+        function loadDataForCurrentMonth() {
+            loadIncomeForCurrentMonth();
+            autoGenerateRecurringForCurrentMonth();
+            try {
+                google.script.run.withSuccessHandler((carryOver) => {
+                    accumulatedCarryOver = carryOver || 0;
+                    updateApp();
+                    hideLoader();
+
+                    if (shouldRequireIncomeForCurrentMonth()) {
+                        setTimeout(showRequiredIncomeModal, 100);
+                    } else if (isFirstLoad) {
+                        setTimeout(maybeShowTutorialOnFirstVisit, 400);
+                    }
+
+                    if (isFirstLoad) isFirstLoad = false;
+                }).withFailureHandler((err) => {
+                    console.error(err);
+                    hideLoader();
+                    alert('Gagal menghitung saldo carry-over bulan ini. Coba ganti bulan lagi atau muat ulang halaman.');
+                }).getAccumulatedCarryOver(currentMonth, currentYear, dbData, dbIncomes);
+            } catch (e) {
+                hideLoader();
+            }
+        }
+
+        function findFutureRecurringClones(sourceRow) {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const sourceIdx = monthNames.indexOf(sourceRow.month);
+            if (sourceIdx === -1 || !sourceRow.year) return [];
+            const sourceAbs = parseInt(sourceRow.year) * 12 + sourceIdx;
+
+            return dbData.filter(r => {
+                if (r === sourceRow) return false;
+                if (r.recurring !== true) return false;
+                if (r.status) return false; 
+                if (r.expense !== sourceRow.expense || r.account !== sourceRow.account || r.category !== sourceRow.category) return false;
+                const idx = monthNames.indexOf(r.month);
+                if (idx === -1 || !r.year) return false;
+                const abs = parseInt(r.year) * 12 + idx;
+                return abs > sourceAbs;
+            });
+        }
+
+        function autoGenerateRecurringForCurrentMonth() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const hasCurrentMonthData = dbData.some(r => r.month === currentMonth && String(r.year) === currentYear);
+            if (hasCurrentMonthData) return;
+
+            const currentAbs = parseInt(currentYear) * 12 + monthNames.indexOf(currentMonth);
+
+            let latestAbs = -1, latestMonth = null, latestYear = null;
+            dbData.forEach(r => {
+                const idx = monthNames.indexOf(r.month);
+                if (idx === -1 || !r.year) return;
+                const abs = parseInt(r.year) * 12 + idx;
+                if (abs < currentAbs && abs > latestAbs) {
+                    latestAbs = abs; latestMonth = r.month; latestYear = String(r.year);
+                }
+            });
+            if (latestMonth === null) return;
+
+            const recurringRows = dbData.filter(r => r.month === latestMonth && String(r.year) === latestYear && r.recurring);
+            if (recurringRows.length === 0) return;
+
+            recurringRows.forEach(r => {
+                dbData.push({
+                    status: false,
+                    account: r.account,
+                    expense: r.expense,
+                    category: r.category,
+                    price: r.price,
+                    qty: r.qty,
+                    allocation: r.allocation,
+                    month: currentMonth,
+                    year: currentYear,
+                    recurring: true,
+                    createdAt: defaultRowDateString()
+                });
+            });
+
+            triggerAutoSave();
+        }
+
+        function getPeriodAbs(year, monthIndex) {
+            return Number(year) * 12 + Number(monthIndex);
+        }
+
+        function getRelevantIncomePeriods() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const periods = [];
+            let minAbs = null;
+            let maxAbs = null;
+
+            dbData.forEach(row => {
+                const monthIndex = monthNames.indexOf(row.month);
+                const year = Number(row.year);
+                if (monthIndex === -1 || !year) return;
+                const abs = getPeriodAbs(year, monthIndex);
+                if (minAbs === null || abs < minAbs) minAbs = abs;
+                if (maxAbs === null || abs > maxAbs) maxAbs = abs;
+            });
+
+            const currentAbs = getPeriodAbs(currentYear, monthNames.indexOf(currentMonth));
+            if (minAbs === null) minAbs = currentAbs;
+            if (maxAbs === null || currentAbs > maxAbs) maxAbs = currentAbs;
+
+            for (let abs = minAbs; abs <= maxAbs; abs++) {
+                const year = Math.floor(abs / 12);
+                const monthIndex = abs % 12;
+                const month = monthNames[monthIndex];
+                periods.push({
+                    month,
+                    year: String(year),
+                    key: getIncomeKey(month, String(year))
+                });
+            }
+            return periods;
+        }
+
+        function hasValidIncomeValue(key) {
+            if (!Object.prototype.hasOwnProperty.call(dbIncomes, key)) return false;
+            const value = Number(dbIncomes[key]);
+            return Number.isFinite(value) && value > 0;
+        }
+
+        function getMissingIncomePeriods() {
+            return getRelevantIncomePeriods().filter(period => !hasValidIncomeValue(period.key));
+        }
+
+        function hasIncomeForCurrentMonth() {
+            const incomeKey = getIncomeKey(currentMonth, currentYear);
+            if (!Object.prototype.hasOwnProperty.call(dbIncomes, incomeKey)) return false;
+            const value = Number(dbIncomes[incomeKey]);
+            return Number.isFinite(value) && value > 0;
+        }
+
+        function shouldRequireIncomeForCurrentMonth() {
+            return !hasIncomeForCurrentMonth();
+        }
+
+        function getCurrentPeriodLabel() {
+            return `${currentMonth} ${currentYear}`;
+        }
+
+        function showRequiredIncomeModal() {
+            const modal = document.getElementById('income-required-modal');
+            const panel = document.getElementById('income-required-panel');
+            const period = document.getElementById('income-required-period');
+            const message = document.getElementById('income-required-message');
+            const input = document.getElementById('income-required-input');
+            const error = document.getElementById('income-required-error');
+            const applyAllBox = document.getElementById('income-apply-all-box');
+            const applyAll = document.getElementById('income-apply-all');
+            const missingCount = document.getElementById('income-missing-count');
+            const missingPeriods = getMissingIncomePeriods();
+
+            period.innerText = getCurrentPeriodLabel();
+            message.innerText = `Income untuk ${getCurrentPeriodLabel()} belum pernah diinput.`;
+            missingCount.innerText = `Belum ada income pada ${missingPeriods.length} bulan.`;
+            applyAll.checked = isFirstLoad && missingPeriods.length > 1;
+            applyAllBox.classList.toggle('hidden', missingPeriods.length <= 1);
+            error.classList.add('hidden');
+            input.value = '';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+                panel.classList.add('scale-100');
+                setTimeout(() => input.focus(), 100);
+            });
+        }
+
+        function saveRequiredIncome() {
+            const input = document.getElementById('income-required-input');
+            const error = document.getElementById('income-required-error');
+            const applyAll = document.getElementById('income-apply-all');
+            const rawDigits = input.value.replace(/[^\d]/g, '');
+
+            if (rawDigits === '') {
+                error.classList.remove('hidden');
+                input.focus();
+                return;
+            }
+
+            const incomeValue = Number(rawDigits);
+            const bulanLabel = getCurrentPeriodLabel();
+            const nominalLabel = formatNumberOnly(incomeValue);
+            const isConfirmed = confirm(`Apakah anda yakin Income Bulan ${bulanLabel} saat ini Rp${nominalLabel}?`);
+
+            if (!isConfirmed) {
+                input.focus(); 
+                return; 
+            }
+
+            const missingPeriods = getMissingIncomePeriods();
+            const incomeKey = getIncomeKey(currentMonth, currentYear);
+
+            if (applyAll.checked) {
+                missingPeriods.forEach(period => {
+                    dbIncomes[period.key] = incomeValue.toString();
+                });
+            } else {
+                dbIncomes[incomeKey] = incomeValue.toString();
+            }
+
+            totalIncome = Number(dbIncomes[incomeKey]) || 0;
+            document.getElementById('total-income-input').value = formatNumberOnly(totalIncome);
+
+            closeRequiredIncomeModal();
+            updateApp();
+            saveAllIncomes();
+        }
+
+        function saveAllIncomes() {
+            const statusBox = document.getElementById('save-status');
+            isSavePending = true;
+            statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+            try {
+                google.script.run.withSuccessHandler(() => {
+                    isSavePending = false;
+                    statusBox.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Saved';
+                    setTimeout(() => statusBox.innerHTML = '', 3000);
+                }).withFailureHandler((err) => {
+                    console.error(err);
+                    isSavePending = false;
+                    statusBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-500"></i> Gagal simpan';
+                    alert('Income gagal tersimpan ke Spreadsheet. Periksa koneksi internet lalu coba lagi.');
+                }).saveIncomeMap(dbIncomes);
+            } catch (e) {
+                isSavePending = false;
+                statusBox.innerHTML = '';
+            }
+        }
+
+        function closeRequiredIncomeModal() {
+            const modal = document.getElementById('income-required-modal');
+            const panel = document.getElementById('income-required-panel');
+            modal.classList.add('opacity-0');
+            panel.classList.remove('scale-100');
+            panel.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 250);
+        }
+
+        function loadIncomeForCurrentMonth() {
+            const incomeKey = getIncomeKey(currentMonth, currentYear);
+            const hasIncome = Object.prototype.hasOwnProperty.call(dbIncomes, incomeKey);
+            const savedIncome = hasIncome ? dbIncomes[incomeKey] : null;
+
+            totalIncome = hasIncome ? Number(savedIncome) || 0 : 0;
+            document.getElementById('total-income-input').value = hasIncome ? formatNumberOnly(totalIncome) : '0';
+        }
+
+        function triggerAutoSave() {
+            const statusBox = document.getElementById('save-status');
+            isSavePending = true;
+            statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+            clearTimeout(saveTimeoutId);
+            saveTimeoutId = setTimeout(() => {
+                try {
+                    google.script.run.withSuccessHandler(() => {
+                        isSavePending = false;
+                        statusBox.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Saved';
+                        setTimeout(() => statusBox.innerHTML = '', 3000);
+                    }).withFailureHandler((err) => {
+                        console.error(err);
+                        isSavePending = false;
+                        statusBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2 text-rose-500"></i> Gagal simpan';
+                        alert('Perubahan gagal tersimpan ke Spreadsheet. Jangan tutup tab ini — periksa koneksi internet, lalu coba ubah data sedikit lagi supaya autosave dicoba ulang.');
+                    }).updateData(dbData, currentMonth, currentYear, totalIncome);
+                } catch (e) {
+                    isSavePending = false;
+                    statusBox.innerHTML = '';
+                }
+            }, 1000);
+        }
+
+        function updateApp() {
+            populateCategoryFilterOptions();
+
+            let sumAccount = {}; let sumCategory = {}; let totalAllocated = 0; let totalPaid = 0;
+            let additionalIncome = 0; 
+            let accountIncome = 0;
+            let cashIncome = 0;
+
+            dbOptions.accounts.forEach(acc => sumAccount[acc] = 0);
+            dbOptions.categories.forEach(cat => sumCategory[cat] = 0);
+
+            dbData.forEach(row => {
+                if(row.month !== currentMonth || String(row.year) !== currentYear) return;
+                let amount = Number(row.allocation) || 0;
+                
+                if(String(row.category).toLowerCase() === 'income') {
+                    additionalIncome += amount;
+                    let accName = String(row.account).toLowerCase();
+                    if(accName.includes('cash') || accName.includes('tunai')) {
+                        cashIncome += amount;
+                    } else {
+                        accountIncome += amount;
+                    }
+                } else {
+                    if(row.status) { totalPaid += amount; } 
+                    if(sumAccount[row.account] !== undefined) sumAccount[row.account] += amount;
+                    if(sumCategory[row.category] !== undefined) sumCategory[row.category] += amount;
+                    totalAllocated += amount;
+                }
+            });
+
+            const displayTotalIncome = totalIncome + additionalIncome;
+            document.getElementById('total-income-input').value = formatNumberOnly(displayTotalIncome);
+
+            document.getElementById('account-income-text').innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(accountIncome);
+            document.getElementById('account-income-row').classList.remove('hidden');
+
+            document.getElementById('cash-income-text').innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(cashIncome);
+            document.getElementById('cash-income-row').classList.toggle('hidden', cashIncome === 0);
+
+            document.getElementById('realization-amount').innerText = formatNumberOnly(totalPaid);
+            let realizationPercent = totalAllocated > 0 ? Math.round((totalPaid / totalAllocated) * 100) : 0;
+            document.getElementById('realization-percent').innerText = `${realizationPercent}% Paid`;
+            document.getElementById('realization-bar').style.width = `${realizationPercent}%`;
+
+            document.getElementById('total-budgeting-amount').innerText = formatNumberOnly(totalAllocated);
+
+            const accContainer = document.getElementById('account-summary-container'); accContainer.innerHTML = '';
+            dbOptions.accounts.forEach((acc, i) => {
+                if(sumAccount[acc] > 0) {
+                    accContainer.innerHTML += `
+                    <div class="flex justify-between items-center group relative">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full" style="background:${getColor(i)}"></span>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">${escapeHtml(acc)}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-bold text-gray-800 dark:text-white">${formatNumberOnly(sumAccount[acc])}</span>
+                            <div class="w-1 h-5 bg-gray-200 dark:bg-slate-600 rounded-full group-hover:bg-teal-400 transition-colors"></div>
+                        </div>
+                    </div>`;
+                }
+            });
+            if(accContainer.innerHTML === '') accContainer.innerHTML = '<p class="text-xs text-gray-400 italic">No wallet data this month.</p>';
+
+            const catContainer = document.getElementById('category-summary-container'); 
+            catContainer.innerHTML = '';
+            
+            const stackedBarContainer = document.getElementById('category-stacked-bar');
+            let stackedBarHTML = '';
+
+            let categoriesWithData = [];
+            dbOptions.categories.forEach((cat) => {
+                let catAmount = sumCategory[cat];
+                if(catAmount > 0 && String(cat).toLowerCase() !== 'income') {
+                    categoriesWithData.push({
+                        name: cat,
+                        amount: catAmount,
+                        hex: getCategoryColor(cat),
+                        percent: totalAllocated > 0 ? ((catAmount / totalAllocated) * 100).toFixed(1) : 0
+                    });
+                }
+            });
+
+            categoriesWithData.forEach((catData, index) => {
+                catContainer.innerHTML += `
+                <div class="flex justify-between items-center mb-2 last:mb-0">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider" style="background:${catData.hex}">${escapeHtml(catData.name)}</span>
+                        <span class="text-xs text-gray-400">${Math.round(catData.percent)}% of budget</span>
+                    </div>
+                    <span class="text-sm font-bold text-gray-800 dark:text-white">${formatNumberOnly(catData.amount)}</span>
+                </div>`;
+
+                if (catData.percent > 0) {
+                    let isLast = index === categoriesWithData.length - 1;
+                    let radiusStyle = isLast ? 'border-top-right-radius: 9999px; border-bottom-right-radius: 9999px;' : '';
+                    stackedBarHTML += `<div style="width: ${catData.percent}%; background-color: ${catData.hex}; height: 100%; transition: width 0.5s ease-in-out; ${radiusStyle}" title="${escapeHtml(catData.name)}: ${catData.percent}%"></div>`;
+                }
+            });
+
+            if(catContainer.innerHTML === '') {
+                catContainer.innerHTML = '<p class="text-xs text-gray-400 italic">No category data this month.</p>';
+                stackedBarHTML = '<div class="bg-gray-300 dark:bg-slate-600 h-full w-full"></div>';
+            }
+
+            if (stackedBarContainer) {
+                stackedBarContainer.innerHTML = stackedBarHTML;
+            }
+
+            renderTable();
+            renderCharts();
+            updateAppTanpaRenderTabel();
+            updateTrendInsight(totalAllocated);
+        }
+
+        function updateTrendInsight(currentTotalAllocated) {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const insightEl = document.getElementById('trend-insight');
+            const currentAbs = parseInt(currentYear) * 12 + monthNames.indexOf(currentMonth);
+
+            let prevAbs = -1, prevMonth = null, prevYear = null;
+            dbData.forEach(r => {
+                const idx = monthNames.indexOf(r.month);
+                if (idx === -1 || !r.year) return;
+                const abs = parseInt(r.year) * 12 + idx;
+                if (abs < currentAbs && abs > prevAbs) {
+                    prevAbs = abs; prevMonth = r.month; prevYear = String(r.year);
+                }
+            });
+
+            if (prevMonth === null) { insightEl.innerText = ''; return; }
+
+            let prevTotal = 0;
+            dbData.forEach(r => { 
+                if (r.month === prevMonth && String(r.year) === prevYear && String(r.category).toLowerCase() !== 'income') {
+                    prevTotal += (Number(r.allocation) || 0); 
+                }
+            });
+
+            if (prevTotal <= 0) { insightEl.innerText = ''; return; }
+
+            const diffPercent = ((currentTotalAllocated - prevTotal) / prevTotal) * 100;
+            if (Math.abs(diffPercent) < 1) {
+                insightEl.innerHTML = `<i class="fa-solid fa-minus mr-1"></i>Sama seperti bulan lalu`;
+                insightEl.className = 'text-[11px] text-gray-400 dark:text-gray-500 -mt-2 mb-2';
+            } else if (diffPercent > 0) {
+                insightEl.innerHTML = `<i class="fa-solid fa-arrow-trend-up mr-1"></i>Naik ${diffPercent.toFixed(0)}% dari bulan lalu`;
+                insightEl.className = 'text-[11px] text-rose-500 dark:text-rose-400 -mt-2 mb-2';
+            } else {
+                insightEl.innerHTML = `<i class="fa-solid fa-arrow-trend-down mr-1"></i>Turun ${Math.abs(diffPercent).toFixed(0)}% dari bulan lalu`;
+                insightEl.className = 'text-[11px] text-emerald-600 dark:text-emerald-400 -mt-2 mb-2';
+            }
+        }
+
+        function toDateInputValue(createdAt) {
+            if (!createdAt) return '';
+            const raw = String(createdAt).trim();
+            const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+            return match ? match[1] : '';
+        }
+
+        function getMonthYearFromDate(dateValue) {
+            const datePart = toDateInputValue(dateValue);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return null;
+
+            const [year, month] = datePart.split('-').map(Number);
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+
+            if (!year || month < 1 || month > 12) return null;
+            return { year: String(year), month: monthNames[month - 1] };
+        }
+
+        function defaultRowDateString() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const now = new Date();
+            const isRealCurrentMonth = (currentMonth === monthNames[now.getMonth()] && currentYear === now.getFullYear().toString());
+            if (isRealCurrentMonth) {
+                return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            }
+            const mIdx = monthNames.indexOf(currentMonth) + 1;
+            return currentYear + '-' + String(mIdx).padStart(2, '0') + '-01';
+        }
+
+        function populateCategoryFilterOptions() {
+            const select = document.getElementById('category-filter');
+            if (!select) return;
+            const current = select.value || categoryFilter;
+            select.innerHTML = '<option value="all">Semua Kategori</option>' +
+                dbOptions.categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            select.value = dbOptions.categories.includes(current) ? current : 'all';
+            categoryFilter = select.value;
+        }
+
+        function toggleCategorySort() {
+            if (categorySortDir === null) categorySortDir = 'asc';
+            else if (categorySortDir === 'asc') categorySortDir = 'desc';
+            else categorySortDir = null;
+
+            const icon = document.getElementById('category-sort-icon');
+            if (categorySortDir === 'asc') { icon.className = 'fa-solid fa-arrow-up-a-z ml-1 text-teal-500'; }
+            else if (categorySortDir === 'desc') { icon.className = 'fa-solid fa-arrow-down-a-z ml-1 text-teal-500'; }
+            else { icon.className = 'fa-solid fa-sort ml-1 text-gray-300 dark:text-slate-500'; }
+
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            let effectiveCarryOver = accumulatedCarryOver || 0;
+            let additionalIncome = 0;
+            dbData.forEach(row => {
+                if(row.month === currentMonth && String(row.year) === currentYear && String(row.category).toLowerCase() === 'income') {
+                    additionalIncome += (Number(row.allocation) || 0);
+                }
+            });
+            let displayTotalIncome = totalIncome + additionalIncome;
+            let effectiveTotalIncome = displayTotalIncome + effectiveCarryOver;
+
+            let visibleRows = [];
+            dbData.forEach((row, index) => {
+                if (row.month !== currentMonth || String(row.year) !== currentYear) return;
+                if (categoryFilter !== 'all' && row.category !== categoryFilter) return;
+                visibleRows.push({ row, index });
+            });
+
+            if (categorySortDir) {
+                visibleRows.sort((a, b) => {
+                    const cmp = String(a.row.category).localeCompare(String(b.row.category));
+                    return categorySortDir === 'asc' ? cmp : -cmp;
+                });
+            }
+
+            visibleRows.forEach(({ row, index }) => {
+                let isChecked = row.status === true;
+                let tr = document.createElement('tr');
+                tr.className = `transition-colors group ${isChecked ? 'strikethrough' : 'hover:bg-gray-50/50 dark:hover:bg-slate-700/30'}`;
+                
+                let accStyle = getOptionStyle('account', row.account, document.documentElement.classList.contains('dark'));
+                let catStyle = getOptionStyle('category', row.category, document.documentElement.classList.contains('dark'));
+                
+                let isIncome = String(row.category).toLowerCase() === 'income';
+                let percent = ((effectiveTotalIncome > 0) ? ((row.allocation / effectiveTotalIncome) * 100).toFixed(1) : '0.0');
+
+                let disAttr = isChecked ? 'disabled' : '';
+                let selectCursor = isChecked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-gray-300 dark:hover:border-slate-500';
+                let inputCursor = isChecked ? 'cursor-not-allowed text-gray-500 dark:text-gray-400' : '';
+                let editableBg = isChecked ? 'bg-gray-100/50 dark:bg-slate-800 border-transparent' : 'bg-gray-50/50 dark:bg-slate-800/50 border-dashed border-gray-200 dark:border-slate-600 focus-within:border-teal-500 focus-within:bg-teal-50 dark:focus-within:bg-teal-900/20';
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-center" data-label="Status">
+                        <input type="checkbox" class="w-4 h-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500 cursor-pointer" ${isChecked ? 'checked' : ''}>
+                    </td>
+                    <td class="px-4 py-3 font-semibold" data-label="Account">
+                        <div class="px-2 py-1 rounded border border-transparent transition-all ${selectCursor}" 
+                             style="background-color: ${accStyle.bg}; color: ${accStyle.text};">
+                            <select class="acc-select bg-transparent outline-none w-full font-semibold ${isChecked ? 'cursor-not-allowed' : 'cursor-pointer'}" ${disAttr}>
+                                ${dbOptions.accounts.map(a => `<option value="${escapeHtml(a)}" ${row.account === a ? 'selected' : ''} class="dark:bg-slate-800 text-gray-800 dark:text-gray-200">${escapeHtml(a)}</option>`).join('')}
+                            </select>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700 dark:text-gray-300" data-label="Expenses List">
+                        <div class="editable-field px-2 py-1 rounded border transition-all ${editableBg}">
+                            <input type="text" class="exp-input bg-transparent w-full outline-none ${inputCursor}" value="${escapeHtml(row.expense)}" ${disAttr}>
+                        </div>
+                        <div class="flex items-center gap-1 mt-1 pl-2 group/date">
+                            <i class="fa-regular fa-calendar text-gray-400 dark:text-gray-500 text-[10px] ${!isChecked ? 'group-hover/date:text-teal-500' : ''} transition-colors"></i>
+                            <input type="date" class="date-input bg-transparent text-[10px] text-gray-400 dark:text-gray-500 outline-none border-none p-0 transition-colors ${isChecked ? 'cursor-not-allowed' : 'cursor-pointer hover:text-teal-500 focus:text-teal-600'}" value="${toDateInputValue(row.createdAt)}" title="Pilih tanggal transaksi aktual." aria-label="Tanggal transaksi" ${disAttr}>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-center" data-label="Main Category">
+                        <div class="px-2 py-1 rounded inline-block min-w-[100px] border border-transparent transition-all ${selectCursor}"
+                             style="background-color: ${catStyle.bg}; color: ${catStyle.text};">
+                            <select class="cat-select bg-transparent outline-none w-full text-center font-bold ${isChecked ? 'cursor-not-allowed' : 'cursor-pointer'}" ${disAttr}>
+                                ${dbOptions.categories.map(c => `<option value="${escapeHtml(c)}" ${row.category === c ? 'selected' : ''} class="dark:bg-slate-800 text-gray-800 dark:text-gray-200">${escapeHtml(c)}</option>`).join('')}
+                            </select>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-right" data-label="Price">
+                        <div class="flex justify-end items-center editable-field px-2 py-1 rounded border transition-all ${editableBg}">
+                            <span class="mr-1 text-xs opacity-70 font-bold">Rp</span>
+                            <input type="number" class="price-input font-bold bg-transparent text-right outline-none w-full min-w-[80px] ${inputCursor}" value="${row.price}" min="0" ${disAttr}>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-center" data-label="Qty">
+                        <div class="flex justify-center items-center editable-field px-1 py-1 rounded mx-auto w-16 border transition-all ${editableBg}">
+                            <span class="mr-1 text-xs opacity-70">x</span>
+                            <input type="number" class="qty-input font-bold bg-transparent text-center outline-none w-full ${inputCursor}" value="${row.qty}" min="1" ${disAttr}>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-right font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap" data-label="Total">
+                        <span class="total-display">${formatIDR(row.allocation)}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center text-gray-400 text-xs font-bold pct-display" data-label="Usage">${isIncome ? 'N/A' : percent + '%'}</td>
+                    <td class="px-2 py-3 text-center mobile-bottom-right">
+                        <div class="flex items-center justify-center gap-1">
+                            <button class="recurring-btn transition-colors p-2 rounded-lg ${row.recurring ? 'text-teal-500 bg-teal-50 dark:bg-teal-900/30' : 'text-gray-300'} ${isChecked ? 'cursor-not-allowed opacity-50' : (row.recurring ? 'hover:text-teal-600' : 'hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20')}" title="Rutin bulanan" ${disAttr}>
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                            <button class="del-btn transition-colors p-2 rounded-lg text-gray-300 ${isChecked ? 'cursor-not-allowed opacity-50' : 'hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30'}" ${disAttr}>
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tr.querySelector('input[type="checkbox"]').addEventListener('change', (e) => { dbData[index].status = e.target.checked; updateApp(); triggerAutoSave(); });
+                tr.querySelector('.acc-select').addEventListener('change', (e) => { dbData[index].account = e.target.value; updateApp(); triggerAutoSave(); });
+                tr.querySelector('.exp-input').addEventListener('change', (e) => { dbData[index].expense = e.target.value; triggerAutoSave(); });
+                tr.querySelector('.date-input').addEventListener('change', (e) => {
+                    const selectedDate = e.target.value;
+                    if (!selectedDate) return;
+                    const rowData = dbData[index];
+                    const period = getMonthYearFromDate(selectedDate);
+                    if (!period) { e.target.value = toDateInputValue(rowData.createdAt); return; }
+                    rowData.createdAt = selectedDate;
+                    rowData.month = period.month;
+                    rowData.year = period.year;
+                    if (rowData.month !== currentMonth || String(rowData.year) !== currentYear) {
+                        categoryFilter = 'all';
+                        const categorySelect = document.getElementById('category-filter');
+                        if (categorySelect) categorySelect.value = 'all';
+                    }
+                    updateApp(); triggerAutoSave();
+                });
+                tr.querySelector('.cat-select').addEventListener('change', (e) => { dbData[index].category = e.target.value; updateApp(); triggerAutoSave(); });
+                
+                tr.querySelector('.price-input').addEventListener('input', (e) => { 
+                    dbData[index].price = Number(e.target.value) || 0; 
+                    dbData[index].allocation = dbData[index].price * dbData[index].qty;
+                    updateAppTanpaRenderTabel(); triggerAutoSave(); 
+                });
+                tr.querySelector('.price-input').addEventListener('change', () => { updateApp(); });
+
+                tr.querySelector('.qty-input').addEventListener('input', (e) => { 
+                    dbData[index].qty = Number(e.target.value) || 1; 
+                    dbData[index].allocation = dbData[index].price * dbData[index].qty;
+                    updateAppTanpaRenderTabel(); triggerAutoSave(); 
+                });
+                tr.querySelector('.qty-input').addEventListener('change', () => { updateApp(); });
+
+                tr.querySelector('.recurring-btn').addEventListener('click', () => {
+                    if (dbData[index].status) return;
+                    const rowData = dbData[index];
+                    const turningOff = rowData.recurring === true;
+                    rowData.recurring = !rowData.recurring;
+
+                    if (turningOff) {
+                        const futureClones = findFutureRecurringClones(rowData);
+                        if (futureClones.length > 0) {
+                            if (confirm(`Hapus salinan otomatis di bulan berikutnya?`)) {
+                                futureClones.forEach(clone => {
+                                    const idx = dbData.indexOf(clone);
+                                    if (idx !== -1) dbData.splice(idx, 1);
+                                });
+                            }
+                        }
+                    }
+                    triggerAutoSave(); updateApp();
+                });
+                tr.querySelector('.del-btn').addEventListener('click', () => { 
+                    if (dbData[index].status) return; 
+                    if (confirm("Hapus baris ini?")) { dbData.splice(index, 1); updateApp(); triggerAutoSave(); } 
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateAppTanpaRenderTabel() {
+            let totalAllocated = 0;
+            let additionalIncome = 0; 
+            let accountIncome = 0;
+            let cashIncome = 0;
+
+            dbData.forEach(row => { 
+                if(row.month === currentMonth && String(row.year) === currentYear) {
+                    let amount = Number(row.allocation) || 0;
+                    if(String(row.category).toLowerCase() === 'income') {
+                        additionalIncome += amount;
+                        let accName = String(row.account).toLowerCase();
+                        if(accName.includes('cash') || accName.includes('tunai')) {
+                            cashIncome += amount;
+                        } else {
+                            accountIncome += amount;
+                        }
+                    } else {
+                        totalAllocated += amount;
+                    }
+                } 
+            });
+            
+            const displayTotalIncome = totalIncome + additionalIncome;
+            document.getElementById('total-income-input').value = formatNumberOnly(displayTotalIncome);
+            document.getElementById('total-budgeting-amount').innerText = formatNumberOnly(totalAllocated);
+
+            let effectiveCarryOver = accumulatedCarryOver || 0;
+            let effectiveTotalIncome = displayTotalIncome + effectiveCarryOver; 
+            
+            document.getElementById('effective-income-text').innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(effectiveTotalIncome);
+            document.getElementById('effective-income-row').classList.remove('hidden'); 
+
+            document.getElementById('account-income-text').innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(accountIncome);
+            document.getElementById('account-income-row').classList.remove('hidden');
+
+            document.getElementById('cash-income-text').innerText = incomeDetailsHidden ? 'Rp ••••••' : formatIDR(cashIncome);
+            document.getElementById('cash-income-row').classList.toggle('hidden', cashIncome === 0);
+
+            let nonAllocated = displayTotalIncome - totalAllocated;
+            let usagePercent = displayTotalIncome > 0 ? (totalAllocated / displayTotalIncome) * 100 : 0;
+            
+            document.getElementById('non-allocated').innerText = formatIDR(nonAllocated); 
+            document.getElementById('non-allocated').className = `text-xl font-bold transition-colors duration-300 drop-shadow-sm ${nonAllocated < 0 ? 'text-rose-300' : 'text-white'}`;
+            let usageColor = usagePercent >= 100 ? 'text-rose-300' : (usagePercent >= 80 ? 'text-amber-200' : 'text-white');
+            document.getElementById('usage-text').className = `text-xl font-bold drop-shadow-sm transition-colors duration-300 ${usageColor}`;
+            document.getElementById('usage-text').innerText = `${usagePercent.toFixed(1)}%`;
+            updateIncomeBadge(nonAllocated);
+            
+            const trs = document.getElementById('table-body').children; let trIndex = 0;
+            for(let i=0; i<dbData.length; i++) {
+                if(dbData[i].month !== currentMonth || String(dbData[i].year) !== currentYear) continue;
+                if(trs[trIndex]) {
+                    let isIncome = String(dbData[i].category).toLowerCase() === 'income';
+                    trs[trIndex].querySelector('.total-display').innerText = formatIDR(dbData[i].allocation);
+                    trs[trIndex].querySelector('.pct-display').innerText = isIncome ? 'N/A' : (((effectiveTotalIncome > 0) ? ((dbData[i].allocation / effectiveTotalIncome) * 100).toFixed(1) : '0.0') + '%');
+                    trIndex++;
+                }
+            }
+        }
+
+        function addRow() {
+            if (!hasIncomeForCurrentMonth()) {
+                showRequiredIncomeModal();
+                return;
+            }
+
+            const transactionDate = defaultRowDateString();
+            const period = getMonthYearFromDate(transactionDate) || { month: currentMonth, year: currentYear };
+
+            dbData.push({
+                status: false,
+                account: dbOptions.accounts[0],
+                expense: 'New Item',
+                category: dbOptions.categories[0],
+                price: 0,
+                qty: 1,
+                allocation: 0,
+                month: period.month,
+                year: period.year,
+                recurring: false,
+                createdAt: transactionDate
+            });
+
+            updateApp();
+            triggerAutoSave();
+
+            const tbody = document.getElementById('table-body');
+            const lastRow = tbody.querySelector('tr:last-child');
+            if (lastRow) {
+                const expenseInput = lastRow.querySelector('.exp-input');
+                if (expenseInput) {
+                    expenseInput.focus();
+                    expenseInput.select();
+                }
+            }
+        }
+
+        document.getElementById('month-year-picker').addEventListener('change', (e) => {
+            const val = e.target.value; if(!val) return;
+            currentYear = val.split('-')[0];
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            currentMonth = monthNames[parseInt(val.split('-')[1]) - 1];
+            loadDataForCurrentMonth();
+        });
+
+        document.getElementById('category-filter').addEventListener('change', (e) => {
+            categoryFilter = e.target.value;
+            renderTable();
+        });
+
+        document.getElementById('income-required-input').addEventListener('input', (e) => {
+            const input = e.target;
+            const rawDigits = input.value.replace(/[^\d]/g, '');
+            input.value = rawDigits ? formatNumberOnly(Number(rawDigits)) : '';
+            document.getElementById('income-required-error').classList.add('hidden');
+        });
+
+        document.getElementById('income-required-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveRequiredIncome();
+            }
+        });
+
+        document.getElementById('total-income-input').addEventListener('input', (e) => {
+            const input = e.target;
+            const rawDigits = input.value.replace(/[^\d]/g, '');
+            totalIncome = rawDigits ? Number(rawDigits) : 0;
+
+            const digitsBeforeCaret = input.value.slice(0, input.selectionStart).replace(/[^\d]/g, '').length;
+            const formatted = rawDigits ? formatNumberOnly(totalIncome) : '';
+            input.value = formatted;
+
+            let newCaretPos = 0, digitsSeen = 0;
+            while (newCaretPos < formatted.length && digitsSeen < digitsBeforeCaret) {
+                if (/\d/.test(formatted[newCaretPos])) digitsSeen++;
+                newCaretPos++;
+            }
+            input.setSelectionRange(newCaretPos, newCaretPos);
+
+            let incomeKey = getIncomeKey(currentMonth, currentYear);
+            dbIncomes[incomeKey] = totalIncome.toString();
+
+            updateAppTanpaRenderTabel(); triggerAutoSave();
+        });
+
+        function renderCharts() {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            const isDark = document.documentElement.classList.contains('dark');
+            const tickColor = isDark ? '#94a3b8' : '#64748b'; 
+            
+            // 1. Top Spending by Expenses List (Single Teal Color #14b8a6, Clean & Readable for Awam)
+            let spendingLabels = [];
+            let spendingValues = [];
+
+            let expensesMap = {};
+            dbData.forEach(row => {
+                if (row.month === currentMonth && String(row.year) === currentYear && String(row.category).toLowerCase() !== 'income') {
+                    let expName = row.expense || 'Other';
+                    let amt = Number(row.allocation) || 0;
+                    expensesMap[expName] = (expensesMap[expName] || 0) + amt;
+                }
+            });
+
+            let sortedExpenses = Object.entries(expensesMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            sortedExpenses.forEach(([name, val]) => {
+                spendingLabels.push(name);
+                spendingValues.push(val);
+            });
+
+            const topCtx = document.getElementById('topSpendingChart');
+            if(topCtx) {
+                if(myTopSpendingChart) myTopSpendingChart.destroy();
+                myTopSpendingChart = new Chart(topCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: spendingLabels,
+                        datasets: [{
+                            label: 'Spent',
+                            data: spendingValues,
+                            backgroundColor: '#14b8a6', // Single Teal Color for clean readability
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(context) { return 'Spent: ' + formatIDR(context.raw); } } }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                                ticks: {
+                                    color: tickColor,
+                                    font: { size: 10 },
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000) + 'M';
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                }
+                            },
+                            y: { grid: { display: false }, ticks: { color: tickColor, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Expense vs Income Area Chart
+            const areaCtx = document.getElementById('areaChart');
+            if (areaCtx) {
+                const ctx = areaCtx.getContext('2d');
+                
+                const incomeGradient = ctx.createLinearGradient(0, 0, 0, 220);
+                incomeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+                incomeGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                
+                const expenseGradient = ctx.createLinearGradient(0, 0, 0, 220);
+                expenseGradient.addColorStop(0, 'rgba(244, 63, 94, 0.4)');
+                expenseGradient.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const fullMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                
+                let chartLabels = [];
+                let expenseData = [];
+                let incomeData = [];
+
+                let currentMonthIdx = fullMonthNames.indexOf(currentMonth);
+                for (let i = 2; i >= 0; i--) { // 2 bulan sebelumnya + bulan berjalan (bukan 6 bulan) — biar tren lebih gampang dibaca
+                    let targetIdx = currentMonthIdx - i;
+                    let targetYearInt = parseInt(currentYear);
+                    let targetMonthName = "";
+                    
+                    if (targetIdx < 0) { targetIdx += 12; targetYearInt -= 1; }
+                    targetMonthName = fullMonthNames[targetIdx];
+                    let targetYearStr = targetYearInt.toString();
+                    chartLabels.push(monthNames[targetIdx]);
+
+                    let mExpense = 0;
+                    dbData.forEach(r => {
+                        if (r.month === targetMonthName && String(r.year) === String(targetYearStr) && String(r.category).toLowerCase() !== 'income') {
+                            mExpense += (Number(r.allocation) || 0);
+                        }
+                    });
+
+                    let incKey = getIncomeKey(targetMonthName, String(targetYearStr));
+                    let mIncome = Object.prototype.hasOwnProperty.call(dbIncomes, incKey) ? Number(dbIncomes[incKey]) || 0 : 0;
+                    
+                    dbData.forEach(r => {
+                        if (r.month === targetMonthName && String(r.year) === String(targetYearStr) && String(r.category).toLowerCase() === 'income') {
+                            mIncome += (Number(r.allocation) || 0);
+                        }
+                    });
+
+                    expenseData.push(mExpense);
+                    incomeData.push(mIncome);
+                }
+
+                if(myAreaChart) myAreaChart.destroy();
+                myAreaChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: incomeData,
+                                borderColor: '#10b981',
+                                backgroundColor: incomeGradient,
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.45, 
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: '#10b981',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Expense',
+                                data: expenseData,
+                                borderColor: '#f43f5e',
+                                backgroundColor: expenseGradient,
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.45, 
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: '#f43f5e',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                                titleColor: isDark ? '#f8fafc' : '#1e293b',
+                                bodyColor: isDark ? '#cbd5e1' : '#475569',
+                                borderColor: isDark ? '#334155' : '#e2e8f0',
+                                borderWidth: 1,
+                                padding: 10,
+                                displayColors: true,
+                                callbacks: {
+                                    title: function(context) { return 'Month: ' + context[0].label; },
+                                    label: function(context) { return context.dataset.label + ': ' + formatIDR(context.raw); }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 10 } } },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                                border: { display: false },
+                                ticks: { 
+                                    color: tickColor, 
+                                    font: { size: 10 },
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000) + 'jt';
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function openModal() { const modal = document.getElementById('add-modal'); modal.style.display = 'flex'; setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); modal.children[0].classList.remove('scale-95'); modal.children[0].classList.add('scale-100'); document.getElementById('new-option-name').focus(); }, 10); }
+        function closeModal() { const modal = document.getElementById('add-modal'); modal.classList.remove('opacity-100'); modal.classList.add('opacity-0'); modal.children[0].classList.remove('scale-100'); modal.children[0].classList.add('scale-95'); setTimeout(() => { modal.style.display = 'none'; document.getElementById('new-option-name').value = ''; }, 300); }
+
+        const TUTORIAL_STORAGE_KEY = 'budgetin_tutorial_seen_v1';
+        let tutorialCurrentSlide = 0;
+        const tutorialTotalSlides = document.querySelectorAll('.tutorial-slide').length;
+
+        function openTutorial() {
+            tutorialCurrentSlide = 0;
+            renderTutorialSlide();
+            const modal = document.getElementById('tutorial-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.remove('opacity-0'); modal.classList.add('opacity-100');
+                modal.children[0].classList.remove('scale-95'); modal.children[0].classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeTutorial() {
+            const modal = document.getElementById('tutorial-modal');
+            modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
+            modal.children[0].classList.remove('scale-100'); modal.children[0].classList.add('scale-95');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+            try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch (e) {}
+        }
+
+        function tutorialStep(direction) {
+            const next = tutorialCurrentSlide + direction;
+            if (next >= tutorialTotalSlides) { closeTutorial(); return; } 
+            if (next < 0) return;
+            tutorialCurrentSlide = next;
+            renderTutorialSlide();
+        }
+
+        function renderTutorialSlide() {
+            document.querySelectorAll('.tutorial-slide').forEach((el, i) => {
+                el.classList.toggle('hidden', i !== tutorialCurrentSlide);
+            });
+            document.querySelectorAll('.tutorial-dot').forEach((dot, i) => {
+                if (i === tutorialCurrentSlide) {
+                    dot.classList.remove('bg-gray-200', 'dark:bg-slate-600', 'w-2');
+                    dot.classList.add('bg-teal-500', 'w-5');
+                } else {
+                    dot.classList.remove('bg-teal-500', 'w-5');
+                    dot.classList.add('bg-gray-200', 'dark:bg-slate-600', 'w-2');
+                }
+            });
+            document.getElementById('tutorial-back-btn').classList.toggle('hidden', tutorialCurrentSlide === 0);
+            document.getElementById('tutorial-next-btn').innerText = (tutorialCurrentSlide === tutorialTotalSlides - 1) ? 'Mulai Pakai' : 'Lanjut';
+        }
+
+        function maybeShowTutorialOnFirstVisit() {
+            let alreadySeen = false;
+            try { alreadySeen = !!localStorage.getItem(TUTORIAL_STORAGE_KEY); } catch (e) { alreadySeen = false; }
+            if (!alreadySeen) openTutorial();
+        }
+
+        function saveNewOption() {
+            const type = document.querySelector('input[name="optionType"]:checked').value;
+            const name = document.getElementById('new-option-name').value.trim();
+            const btn = document.getElementById('btn-save-option');
+            if(!name) return alert("Please enter a name!");
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...'; btn.disabled = true;
+            try {
+                google.script.run.withSuccessHandler((res) => {
+                    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Option'; btn.disabled = false;
+                    if(res.success) { if(type === 'account') dbOptions.accounts = res.options; else dbOptions.categories = res.options; updateApp(); closeModal(); } else alert(res.message);
+                }).withFailureHandler((err) => {
+                    console.error(err);
+                    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Option'; btn.disabled = false;
+                    alert('Gagal menyimpan opsi baru ke Spreadsheet. Coba lagi.');
+                }).addNewOption(type, name);
+            } catch (e) {
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Option'; btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
